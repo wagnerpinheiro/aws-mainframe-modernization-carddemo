@@ -1,0 +1,49 @@
+graph TD
+    subgraph ONLINE["CICS Online"]
+        D1["D1 · Security/Signon\nCOSGN00C · COUSR00-03C\ncbl/ + USRSEC KSDS"]
+        D2["D2 · Navigation Shell\nCOMEN01C · COADM01C\ncpy/COCOM01Y · COMEN02Y · COADM02Y"]
+        D3["D3 · Account & Customer\nCOACTVWC · COACTUPC\nbms/COACTUP · COACTVW"]
+        D4["D4 · Credit Card\nCOCRDLIC · COCRDSLC · COCRDUPC\nbms/COCRDLI · COCRDSL · COCRDUP"]
+        D5["D5 · Transaction Online\nCOTRN00-02C · COBIL00C · CORPT00C\nbms/COTRN00-02 · COBIL00 · CORPT00"]
+    end
+
+    subgraph BATCH["Batch (JCL + CA7/Control-M)"]
+        D6["D6 · Batch TXN Processing\nCBTRN01C · CBTRN02C · CBACT04C\njcl/POSTTRAN · INTCALC · COMBTRAN"]
+        D7["D7 · Reporting & Statements\nCBACT01-03C · CBCUS01C\nCBSTM03A+B · CBTRN03C\njcl/CREASTMT · TRANREPT"]
+        D8["D8 · Data Migration\nCBEXPORT · CBIMPORT\njcl/CBEXPORT · CBIMPORT"]
+    end
+
+    subgraph OPT["Optional Extensions (feature-gated)"]
+        D9["D9 · auth-ims-db2-mq\n· txtype-db2 · vsam-mq\napp-authorization-ims-db2-mq/\napp-transaction-type-db2/\napp-vsam-mq/"]
+    end
+
+    D10["D10 · Platform Utilities\nCSUTLDTC · COBSWAIT\nasm/COBDATFT · MVSWAIT\ncpy/CSSETATY · CSMSG01Y · CSSTRPFY"]
+
+    USRSEC[("USRSEC\nVSAM KSDS")]
+    CORE[("ACCTDATA · CUSTFILE\nCARDFILE · CARDXREF\nVSAM KSDS")]
+    TRANFILES[("TRANSACT · TCATBALF\nDALYTRAN · DISCGRP\nVSAM + PS/GDG")]
+
+    D1 --- USRSEC
+    D1 -->|"XCTL: admin→COADM01C\nuser→COMEN01C"| D2
+    D2 -->|"XCTL opts 1-2"| D3
+    D2 -->|"XCTL opts 3-5"| D4
+    D2 -->|"XCTL opts 6-10"| D5
+    D2 -->|"XCTL admin opts 1-4\nCOUSR* user mgmt"| D1
+    D2 -->|"XCTL opt 11 / admin 5-6\n(PGMIDERR if ext absent)"| D9
+    D2 -->|"PF3 back-chain"| D1
+    D3 --- CORE
+    D4 --- CORE
+    D5 --- CORE
+    D5 --- TRANFILES
+    D5 -->|"CALL CSUTLDTC"| D10
+    D3 -->|"COPY CSSTRPFY/CSSETATY"| D10
+    D5 -->|"EXEC CICS WRITEQ TD\n(internal reader JCL)"| D7
+    D6 --- TRANFILES
+    D6 --- CORE
+    D6 -->|"DALYREJS GDG output"| D7
+    D7 --- CORE
+    D7 --- TRANFILES
+    D7 -->|"CALL CBSTM03B\nCALL CEEDAYS (LE)"| D10
+    D8 --- CORE
+    D8 --- TRANFILES
+    D9 --- CORE
