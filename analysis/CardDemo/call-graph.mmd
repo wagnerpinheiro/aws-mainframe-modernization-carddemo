@@ -1,0 +1,35 @@
+graph TD
+
+    %% Entry-point CICS transactions (via CSD)
+    CC00([CC00: Signon]):::entry --> D1
+    CM00([CM00: Main Menu]):::entry --> D2
+    CA00([CA00: Admin Menu]):::entry --> D2
+
+    %% Domain nodes
+    D1[D1: Security & Signon]
+    D2[D2: Navigation Shell]
+    D3[D3: Account & Customer]
+    D4[D4: Credit Card]
+    D5[D5: Transaction Online]
+    D6[D6: Batch EOD]
+    D7[D7: Reporting & Statements]
+    D8[D8: Data Migration]
+    D9[D9: Optional Extensions]
+    D10[D10: Platform Utilities]
+
+    %% Dispatch edges
+    D1 -->|XCTL post-login| D2
+    D2 -->|XCTL user menu| D3
+    D2 -->|XCTL user menu| D4
+    D2 -->|XCTL user menu| D5
+    D2 -->|XCTL admin menu| D1
+    D5 -->|TDQ INREADER| D6
+    D2 -->|TDQ INREADER| D6
+    D6 -->|triggers| D7
+    D9 -->|optional: IMS/DB2/MQ| D6
+    D3 -.->|calls| D10
+    D4 -.->|calls| D10
+
+    classDef entry fill:#f90,stroke:#c60,color:#000
+    classDef domain fill:#4a90d9,stroke:#2870b9,color:#fff
+    class D1,D2,D3,D4,D5,D6,D7,D8,D9,D10 domain

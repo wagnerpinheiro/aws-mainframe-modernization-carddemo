@@ -1,0 +1,39 @@
+flowchart TD
+
+    %% Primary flow: End-of-Day Batch Processing
+    START([CA7 / Control-M Scheduler]):::entry
+    CBTRN01C[CBTRN01C\nValidate daily txns\n~494 LOC]:::batch
+    CBTRN02C[CBTRN02C\nPost transactions\n~731 LOC]:::batch
+    CBACT04C[CBACT04C\nInterest calculation\n~652 LOC]:::batch
+    CBSTM03A[CBSTM03A → CBSTM03B\nGenerate statements\n~924+230 LOC]:::batch
+    CBTRN03C[CBTRN03C\nTransaction report\n~649 LOC]:::batch
+    DALYTRAN[(DALYTRAN\nDaily transaction file)]:::vsam
+    TRANSACT[(TRANSACT\nVSAM transaction store)]:::vsam
+    ACCTDATA[(ACCTDATA\nAccount balances)]:::vsam
+    DISCGRP[(DISCGRP\nDiscount groups)]:::vsam
+    TCATBALF[(TCATBALF\nCategory balances GDG)]:::gdg
+    STMTOUT[(Statement output)]:::output
+    RPTOUT[(Report output)]:::output
+
+    START --> CBTRN01C
+    CBTRN01C -->|reads| DALYTRAN
+    CBTRN01C -->|writes| TRANSACT
+    CBTRN01C --> CBTRN02C
+    CBTRN02C -->|reads| DISCGRP
+    CBTRN02C -->|reads| TCATBALF
+    CBTRN02C -->|updates| ACCTDATA
+    CBTRN02C -->|updates| TCATBALF
+    CBTRN02C --> CBACT04C
+    CBACT04C -->|recalculates| ACCTDATA
+    CBACT04C --> CBSTM03A
+    CBACT04C --> CBTRN03C
+    CBSTM03A -->|reads| ACCTDATA
+    CBSTM03A -->|writes| STMTOUT
+    CBTRN03C -->|reads| TRANSACT
+    CBTRN03C -->|writes| RPTOUT
+
+    classDef entry fill:#f90,stroke:#c60,color:#000
+    classDef batch fill:#70ad47,stroke:#538135,color:#fff
+    classDef vsam fill:#ffd966,stroke:#bf9000,color:#000
+    classDef gdg fill:#f4b942,stroke:#c96a00,color:#000
+    classDef output fill:#dde7f3,stroke:#4472c4,color:#000

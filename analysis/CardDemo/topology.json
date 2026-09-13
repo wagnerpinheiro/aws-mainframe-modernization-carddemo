@@ -1,0 +1,1492 @@
+{
+  "system": "CardDemo",
+  "root": {
+    "id": "sys",
+    "name": "CardDemo",
+    "kind": "system",
+    "children": [
+      {
+        "id": "dom:D1-Security",
+        "name": "Security & Signon",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "COSGN00C",
+            "name": "COSGN00C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 260,
+            "file": "legacy/CardDemo/app/cbl/COSGN00C.cbl"
+          },
+          {
+            "id": "COUSR00C",
+            "name": "COUSR00C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 695,
+            "file": "legacy/CardDemo/app/cbl/COUSR00C.cbl"
+          },
+          {
+            "id": "COUSR01C",
+            "name": "COUSR01C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 299,
+            "file": "legacy/CardDemo/app/cbl/COUSR01C.cbl"
+          },
+          {
+            "id": "COUSR02C",
+            "name": "COUSR02C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 414,
+            "file": "legacy/CardDemo/app/cbl/COUSR02C.cbl"
+          },
+          {
+            "id": "COUSR03C",
+            "name": "COUSR03C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 359,
+            "file": "legacy/CardDemo/app/cbl/COUSR03C.cbl"
+          },
+          {
+            "id": "bms:COSGN00",
+            "name": "COSGN00 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COSGN00.bms"
+          },
+          {
+            "id": "bms:COUSR00",
+            "name": "COUSR00 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COUSR00.bms"
+          },
+          {
+            "id": "bms:COUSR01",
+            "name": "COUSR01 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COUSR01.bms"
+          },
+          {
+            "id": "bms:COUSR02",
+            "name": "COUSR02 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COUSR02.bms"
+          },
+          {
+            "id": "bms:COUSR03",
+            "name": "COUSR03 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COUSR03.bms"
+          }
+        ]
+      },
+      {
+        "id": "dom:D2-Navigation",
+        "name": "Navigation Shell",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "COADM01C",
+            "name": "COADM01C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 288,
+            "file": "legacy/CardDemo/app/cbl/COADM01C.cbl"
+          },
+          {
+            "id": "COMEN01C",
+            "name": "COMEN01C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 308,
+            "file": "legacy/CardDemo/app/cbl/COMEN01C.cbl"
+          },
+          {
+            "id": "bms:COMEN01",
+            "name": "COMEN01 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COMEN01.bms"
+          },
+          {
+            "id": "bms:COADM01",
+            "name": "COADM01 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COADM01.bms"
+          }
+        ]
+      },
+      {
+        "id": "dom:D3-Account",
+        "name": "Account & Customer",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "COACTUPC",
+            "name": "COACTUPC",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 4236,
+            "file": "legacy/CardDemo/app/cbl/COACTUPC.cbl"
+          },
+          {
+            "id": "COACTVWC",
+            "name": "COACTVWC",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 941,
+            "file": "legacy/CardDemo/app/cbl/COACTVWC.cbl"
+          },
+          {
+            "id": "bms:COACTVW",
+            "name": "COACTVW (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COACTVW.bms"
+          },
+          {
+            "id": "bms:COACTUP",
+            "name": "COACTUP (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COACTUP.bms"
+          }
+        ]
+      },
+      {
+        "id": "dom:D4-CreditCard",
+        "name": "Credit Card",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "COCRDLIC",
+            "name": "COCRDLIC",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 1459,
+            "file": "legacy/CardDemo/app/cbl/COCRDLIC.cbl"
+          },
+          {
+            "id": "COCRDSLC",
+            "name": "COCRDSLC",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 887,
+            "file": "legacy/CardDemo/app/cbl/COCRDSLC.cbl"
+          },
+          {
+            "id": "COCRDUPC",
+            "name": "COCRDUPC",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 1560,
+            "file": "legacy/CardDemo/app/cbl/COCRDUPC.cbl"
+          },
+          {
+            "id": "bms:COCRDLI",
+            "name": "COCRDLI (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COCRDLI.bms"
+          },
+          {
+            "id": "bms:COCRDSL",
+            "name": "COCRDSL (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COCRDSL.bms"
+          },
+          {
+            "id": "bms:COCRDUP",
+            "name": "COCRDUP (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COCRDUP.bms"
+          }
+        ]
+      },
+      {
+        "id": "dom:D5-Transaction",
+        "name": "Transaction (Online)",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "COBIL00C",
+            "name": "COBIL00C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 572,
+            "file": "legacy/CardDemo/app/cbl/COBIL00C.cbl"
+          },
+          {
+            "id": "CORPT00C",
+            "name": "CORPT00C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 649,
+            "file": "legacy/CardDemo/app/cbl/CORPT00C.cbl"
+          },
+          {
+            "id": "COTRN00C",
+            "name": "COTRN00C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 699,
+            "file": "legacy/CardDemo/app/cbl/COTRN00C.cbl"
+          },
+          {
+            "id": "COTRN01C",
+            "name": "COTRN01C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 330,
+            "file": "legacy/CardDemo/app/cbl/COTRN01C.cbl"
+          },
+          {
+            "id": "COTRN02C",
+            "name": "COTRN02C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 783,
+            "file": "legacy/CardDemo/app/cbl/COTRN02C.cbl"
+          },
+          {
+            "id": "bms:COTRN00",
+            "name": "COTRN00 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COTRN00.bms"
+          },
+          {
+            "id": "bms:COTRN01",
+            "name": "COTRN01 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COTRN01.bms"
+          },
+          {
+            "id": "bms:COTRN02",
+            "name": "COTRN02 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COTRN02.bms"
+          },
+          {
+            "id": "bms:COBIL00",
+            "name": "COBIL00 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/COBIL00.bms"
+          },
+          {
+            "id": "bms:CORPT00",
+            "name": "CORPT00 (BMS)",
+            "kind": "screen",
+            "file": "legacy/CardDemo/app/bms/CORPT00.bms"
+          }
+        ]
+      },
+      {
+        "id": "dom:D6-BatchEOD",
+        "name": "Batch EOD Processing",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "CBACT04C",
+            "name": "CBACT04C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 652,
+            "file": "legacy/CardDemo/app/cbl/CBACT04C.cbl"
+          },
+          {
+            "id": "CBTRN01C",
+            "name": "CBTRN01C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 494,
+            "file": "legacy/CardDemo/app/cbl/CBTRN01C.cbl"
+          },
+          {
+            "id": "CBTRN02C",
+            "name": "CBTRN02C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 731,
+            "file": "legacy/CardDemo/app/cbl/CBTRN02C.cbl"
+          }
+        ]
+      },
+      {
+        "id": "dom:D7-Reporting",
+        "name": "Reporting & Statements",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "CBACT01C",
+            "name": "CBACT01C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 430,
+            "file": "legacy/CardDemo/app/cbl/CBACT01C.cbl"
+          },
+          {
+            "id": "CBACT02C",
+            "name": "CBACT02C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 178,
+            "file": "legacy/CardDemo/app/cbl/CBACT02C.cbl"
+          },
+          {
+            "id": "CBACT03C",
+            "name": "CBACT03C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 178,
+            "file": "legacy/CardDemo/app/cbl/CBACT03C.cbl"
+          },
+          {
+            "id": "CBCUS01C",
+            "name": "CBCUS01C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 178,
+            "file": "legacy/CardDemo/app/cbl/CBCUS01C.cbl"
+          },
+          {
+            "id": "CBSTM03A",
+            "name": "CBSTM03A",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 924,
+            "file": "legacy/CardDemo/app/cbl/CBSTM03A.CBL"
+          },
+          {
+            "id": "CBSTM03B",
+            "name": "CBSTM03B",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 230,
+            "file": "legacy/CardDemo/app/cbl/CBSTM03B.CBL"
+          },
+          {
+            "id": "CBTRN03C",
+            "name": "CBTRN03C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 649,
+            "file": "legacy/CardDemo/app/cbl/CBTRN03C.cbl"
+          }
+        ]
+      },
+      {
+        "id": "dom:D8-Migration",
+        "name": "Data Migration",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "CBEXPORT",
+            "name": "CBEXPORT",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 582,
+            "file": "legacy/CardDemo/app/cbl/CBEXPORT.cbl"
+          },
+          {
+            "id": "CBIMPORT",
+            "name": "CBIMPORT",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 487,
+            "file": "legacy/CardDemo/app/cbl/CBIMPORT.cbl"
+          }
+        ]
+      },
+      {
+        "id": "dom:D9-Extensions",
+        "name": "Optional Extensions",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "CBPAUP0C",
+            "name": "CBPAUP0C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 386,
+            "file": "legacy/CardDemo/app/app-authorization-ims-db2-mq/cbl/CBPAUP0C.cbl"
+          },
+          {
+            "id": "COACCT01",
+            "name": "COACCT01",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 620,
+            "file": "legacy/CardDemo/app/app-vsam-mq/cbl/COACCT01.cbl"
+          },
+          {
+            "id": "COBTUPDT",
+            "name": "COBTUPDT",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 237,
+            "file": "legacy/CardDemo/app/app-transaction-type-db2/cbl/COBTUPDT.cbl"
+          },
+          {
+            "id": "CODATE01",
+            "name": "CODATE01",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 524,
+            "file": "legacy/CardDemo/app/app-vsam-mq/cbl/CODATE01.cbl"
+          },
+          {
+            "id": "COPAUA0C",
+            "name": "COPAUA0C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 1026,
+            "file": "legacy/CardDemo/app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl"
+          },
+          {
+            "id": "COPAUS0C",
+            "name": "COPAUS0C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 1032,
+            "file": "legacy/CardDemo/app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl"
+          },
+          {
+            "id": "COPAUS1C",
+            "name": "COPAUS1C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 604,
+            "file": "legacy/CardDemo/app/app-authorization-ims-db2-mq/cbl/COPAUS1C.cbl"
+          },
+          {
+            "id": "COPAUS2C",
+            "name": "COPAUS2C",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 244,
+            "file": "legacy/CardDemo/app/app-authorization-ims-db2-mq/cbl/COPAUS2C.cbl"
+          },
+          {
+            "id": "COTRTLIC",
+            "name": "COTRTLIC",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 2098,
+            "file": "legacy/CardDemo/app/app-transaction-type-db2/cbl/COTRTLIC.cbl"
+          },
+          {
+            "id": "COTRTUPC",
+            "name": "COTRTUPC",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 1702,
+            "file": "legacy/CardDemo/app/app-transaction-type-db2/cbl/COTRTUPC.cbl"
+          },
+          {
+            "id": "DBUNLDGS",
+            "name": "DBUNLDGS",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 366,
+            "file": "legacy/CardDemo/app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL"
+          },
+          {
+            "id": "PAUDBLOD",
+            "name": "PAUDBLOD",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 369,
+            "file": "legacy/CardDemo/app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL"
+          },
+          {
+            "id": "PAUDBUNL",
+            "name": "PAUDBUNL",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 317,
+            "file": "legacy/CardDemo/app/app-authorization-ims-db2-mq/cbl/PAUDBUNL.CBL"
+          }
+        ]
+      },
+      {
+        "id": "dom:D10-Utilities",
+        "name": "Platform Utilities",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "COBSWAIT",
+            "name": "COBSWAIT",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 41,
+            "file": "legacy/CardDemo/app/cbl/COBSWAIT.cbl"
+          },
+          {
+            "id": "CSUTLDTC",
+            "name": "CSUTLDTC",
+            "kind": "module",
+            "language": "cobol",
+            "loc": 157,
+            "file": "legacy/CardDemo/app/cbl/CSUTLDTC.cbl"
+          }
+        ]
+      },
+      {
+        "id": "dom:data",
+        "name": "Data Stores",
+        "kind": "domain",
+        "children": [
+          {
+            "id": "ds:ACCTDATA",
+            "name": "Account Data (VSAM KSDS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:CUSTFILE",
+            "name": "Customer File (VSAM KSDS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:CARDDATA",
+            "name": "Card Data (VSAM KSDS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:CARDXREF",
+            "name": "Card-Account Xref (VSAM KSDS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:CARDXREF-AIX",
+            "name": "Card Xref Alt Index",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:TRANSACT",
+            "name": "Transaction File (VSAM KSDS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:USRSEC",
+            "name": "User Security File (VSAM KSDS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:DALYTRAN",
+            "name": "Daily Transaction (VSAM ESDS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:DISCGRP",
+            "name": "Discount Groups (VSAM PS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:TCATBALF",
+            "name": "Transaction Category Balances (GDG)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:TRANCATG",
+            "name": "Transaction Categories (VSAM PS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:TRANTYPE",
+            "name": "Transaction Types (VSAM PS)",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:REPORT-OUTPUT",
+            "name": "Report Output Files",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:STATEMENT-OUTPUT",
+            "name": "Account Statements",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:EXPORT-FILE",
+            "name": "Migration Export File",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:DB2-TRNTYPE",
+            "name": "DB2 Transaction Type Table",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:DB2-TRNCAT",
+            "name": "DB2 Transaction Category Table",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:IMS-PAUTH",
+            "name": "IMS Auth Pending DB",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:MQ-AUTHREQ",
+            "name": "MQ Authorization Queue",
+            "kind": "datastore"
+          },
+          {
+            "id": "ds:TDQ-JOBS",
+            "name": "CICS Internal Reader (TDQ JOBS)",
+            "kind": "datastore"
+          }
+        ]
+      }
+    ]
+  },
+  "edges": [
+    {
+      "source": "COMEN01C",
+      "target": "COACTVWC",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "COACTUPC",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "COCRDLIC",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "COCRDSLC",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "COCRDUPC",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "COTRN00C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "COTRN01C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "COTRN02C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "CORPT00C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "COBIL00C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COADM01C",
+      "target": "COUSR00C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COADM01C",
+      "target": "COUSR01C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COADM01C",
+      "target": "COUSR02C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COADM01C",
+      "target": "COUSR03C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COADM01C",
+      "target": "COTRTLIC",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COADM01C",
+      "target": "COTRTUPC",
+      "kind": "dispatch"
+    },
+    {
+      "source": "CORPT00C",
+      "target": "CSUTLDTC",
+      "kind": "call"
+    },
+    {
+      "source": "COTRN02C",
+      "target": "CSUTLDTC",
+      "kind": "call"
+    },
+    {
+      "source": "CBSTM03A",
+      "target": "CBSTM03B",
+      "kind": "call"
+    },
+    {
+      "source": "COSGN00C",
+      "target": "COMEN01C",
+      "kind": "dispatch"
+    },
+    {
+      "source": "COSGN00C",
+      "target": "ds:USRSEC",
+      "kind": "read"
+    },
+    {
+      "source": "COUSR00C",
+      "target": "ds:USRSEC",
+      "kind": "read"
+    },
+    {
+      "source": "COUSR01C",
+      "target": "ds:USRSEC",
+      "kind": "read"
+    },
+    {
+      "source": "COUSR01C",
+      "target": "ds:USRSEC",
+      "kind": "write"
+    },
+    {
+      "source": "COUSR02C",
+      "target": "ds:USRSEC",
+      "kind": "read"
+    },
+    {
+      "source": "COUSR02C",
+      "target": "ds:USRSEC",
+      "kind": "write"
+    },
+    {
+      "source": "COUSR03C",
+      "target": "ds:USRSEC",
+      "kind": "read"
+    },
+    {
+      "source": "COACTVWC",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COACTVWC",
+      "target": "ds:CUSTFILE",
+      "kind": "read"
+    },
+    {
+      "source": "COACTVWC",
+      "target": "ds:CARDXREF",
+      "kind": "read"
+    },
+    {
+      "source": "COACTVWC",
+      "target": "ds:CARDDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COACTUPC",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COACTUPC",
+      "target": "ds:CUSTFILE",
+      "kind": "read"
+    },
+    {
+      "source": "COACTUPC",
+      "target": "ds:CARDXREF",
+      "kind": "read"
+    },
+    {
+      "source": "COACTUPC",
+      "target": "ds:CARDDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COACTUPC",
+      "target": "ds:ACCTDATA",
+      "kind": "write"
+    },
+    {
+      "source": "COACTUPC",
+      "target": "ds:CUSTFILE",
+      "kind": "write"
+    },
+    {
+      "source": "COCRDLIC",
+      "target": "ds:CARDDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDLIC",
+      "target": "ds:CARDXREF",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDLIC",
+      "target": "ds:CARDXREF-AIX",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDLIC",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDSLC",
+      "target": "ds:CARDDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDSLC",
+      "target": "ds:CARDXREF",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDSLC",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDUPC",
+      "target": "ds:CARDDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDUPC",
+      "target": "ds:CARDXREF",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDUPC",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COCRDUPC",
+      "target": "ds:CARDDATA",
+      "kind": "write"
+    },
+    {
+      "source": "COTRN00C",
+      "target": "ds:TRANSACT",
+      "kind": "read"
+    },
+    {
+      "source": "COTRN01C",
+      "target": "ds:TRANSACT",
+      "kind": "read"
+    },
+    {
+      "source": "COTRN02C",
+      "target": "ds:TRANSACT",
+      "kind": "read"
+    },
+    {
+      "source": "COTRN02C",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COTRN02C",
+      "target": "ds:CARDDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COTRN02C",
+      "target": "ds:CARDXREF",
+      "kind": "read"
+    },
+    {
+      "source": "COTRN02C",
+      "target": "ds:TRANSACT",
+      "kind": "write"
+    },
+    {
+      "source": "COBIL00C",
+      "target": "ds:TRANSACT",
+      "kind": "read"
+    },
+    {
+      "source": "COBIL00C",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COBIL00C",
+      "target": "ds:TRANSACT",
+      "kind": "write"
+    },
+    {
+      "source": "COBIL00C",
+      "target": "ds:ACCTDATA",
+      "kind": "write"
+    },
+    {
+      "source": "CORPT00C",
+      "target": "ds:TDQ-JOBS",
+      "kind": "write"
+    },
+    {
+      "source": "COMEN01C",
+      "target": "ds:TDQ-JOBS",
+      "kind": "write"
+    },
+    {
+      "source": "CBTRN01C",
+      "target": "ds:DALYTRAN",
+      "kind": "read"
+    },
+    {
+      "source": "CBTRN01C",
+      "target": "ds:DALYTRAN",
+      "kind": "write"
+    },
+    {
+      "source": "CBTRN01C",
+      "target": "ds:TRANSACT",
+      "kind": "write"
+    },
+    {
+      "source": "CBTRN01C",
+      "target": "ds:REPORT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:DALYTRAN",
+      "kind": "read"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:TRANSACT",
+      "kind": "read"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:DISCGRP",
+      "kind": "read"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:TCATBALF",
+      "kind": "read"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:ACCTDATA",
+      "kind": "write"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:TRANSACT",
+      "kind": "write"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:TCATBALF",
+      "kind": "write"
+    },
+    {
+      "source": "CBTRN02C",
+      "target": "ds:REPORT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBTRN03C",
+      "target": "ds:TRANSACT",
+      "kind": "read"
+    },
+    {
+      "source": "CBTRN03C",
+      "target": "ds:REPORT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBACT01C",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "CBACT01C",
+      "target": "ds:REPORT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBACT02C",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "CBACT02C",
+      "target": "ds:REPORT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBACT03C",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "CBACT03C",
+      "target": "ds:REPORT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBACT04C",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "CBACT04C",
+      "target": "ds:DISCGRP",
+      "kind": "read"
+    },
+    {
+      "source": "CBACT04C",
+      "target": "ds:TCATBALF",
+      "kind": "read"
+    },
+    {
+      "source": "CBACT04C",
+      "target": "ds:TCATBALF",
+      "kind": "write"
+    },
+    {
+      "source": "CBACT04C",
+      "target": "ds:ACCTDATA",
+      "kind": "write"
+    },
+    {
+      "source": "CBCUS01C",
+      "target": "ds:CUSTFILE",
+      "kind": "read"
+    },
+    {
+      "source": "CBCUS01C",
+      "target": "ds:REPORT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBSTM03A",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "CBSTM03A",
+      "target": "ds:TRANSACT",
+      "kind": "read"
+    },
+    {
+      "source": "CBSTM03A",
+      "target": "ds:CUSTFILE",
+      "kind": "read"
+    },
+    {
+      "source": "CBSTM03A",
+      "target": "ds:STATEMENT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBSTM03B",
+      "target": "ds:STATEMENT-OUTPUT",
+      "kind": "write"
+    },
+    {
+      "source": "CBEXPORT",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "CBEXPORT",
+      "target": "ds:CUSTFILE",
+      "kind": "read"
+    },
+    {
+      "source": "CBEXPORT",
+      "target": "ds:CARDDATA",
+      "kind": "read"
+    },
+    {
+      "source": "CBEXPORT",
+      "target": "ds:CARDXREF",
+      "kind": "read"
+    },
+    {
+      "source": "CBEXPORT",
+      "target": "ds:TRANSACT",
+      "kind": "read"
+    },
+    {
+      "source": "CBEXPORT",
+      "target": "ds:EXPORT-FILE",
+      "kind": "write"
+    },
+    {
+      "source": "CBIMPORT",
+      "target": "ds:EXPORT-FILE",
+      "kind": "read"
+    },
+    {
+      "source": "CBIMPORT",
+      "target": "ds:ACCTDATA",
+      "kind": "write"
+    },
+    {
+      "source": "CBIMPORT",
+      "target": "ds:CUSTFILE",
+      "kind": "write"
+    },
+    {
+      "source": "CBIMPORT",
+      "target": "ds:CARDDATA",
+      "kind": "write"
+    },
+    {
+      "source": "CBIMPORT",
+      "target": "ds:CARDXREF",
+      "kind": "write"
+    },
+    {
+      "source": "CBIMPORT",
+      "target": "ds:TRANSACT",
+      "kind": "write"
+    },
+    {
+      "source": "DBUNLDGS",
+      "target": "ds:IMS-PAUTH",
+      "kind": "read"
+    },
+    {
+      "source": "DBUNLDGS",
+      "target": "ds:EXPORT-FILE",
+      "kind": "write"
+    },
+    {
+      "source": "PAUDBLOD",
+      "target": "ds:EXPORT-FILE",
+      "kind": "read"
+    },
+    {
+      "source": "PAUDBLOD",
+      "target": "ds:IMS-PAUTH",
+      "kind": "write"
+    },
+    {
+      "source": "PAUDBUNL",
+      "target": "ds:IMS-PAUTH",
+      "kind": "read"
+    },
+    {
+      "source": "PAUDBUNL",
+      "target": "ds:EXPORT-FILE",
+      "kind": "write"
+    },
+    {
+      "source": "CBPAUP0C",
+      "target": "ds:IMS-PAUTH",
+      "kind": "read"
+    },
+    {
+      "source": "CBPAUP0C",
+      "target": "ds:MQ-AUTHREQ",
+      "kind": "read"
+    },
+    {
+      "source": "CBPAUP0C",
+      "target": "ds:DB2-TRNTYPE",
+      "kind": "write"
+    },
+    {
+      "source": "COTRTLIC",
+      "target": "ds:DB2-TRNTYPE",
+      "kind": "read"
+    },
+    {
+      "source": "COTRTLIC",
+      "target": "ds:DB2-TRNCAT",
+      "kind": "read"
+    },
+    {
+      "source": "COTRTUPC",
+      "target": "ds:DB2-TRNTYPE",
+      "kind": "read"
+    },
+    {
+      "source": "COTRTUPC",
+      "target": "ds:DB2-TRNTYPE",
+      "kind": "write"
+    },
+    {
+      "source": "COBTUPDT",
+      "target": "ds:DB2-TRNCAT",
+      "kind": "read"
+    },
+    {
+      "source": "COBTUPDT",
+      "target": "ds:DB2-TRNCAT",
+      "kind": "write"
+    },
+    {
+      "source": "COACCT01",
+      "target": "ds:ACCTDATA",
+      "kind": "read"
+    },
+    {
+      "source": "COACCT01",
+      "target": "ds:MQ-AUTHREQ",
+      "kind": "write"
+    }
+  ],
+  "entryPoints": [
+    "COACTUPC",
+    "COACTVWC",
+    "COADM01C",
+    "COBIL00C",
+    "COCRDSLC",
+    "COCRDLIC",
+    "COCRDUPC",
+    "COSGN00C",
+    "COMEN01C",
+    "CORPT00C",
+    "COTRN00C",
+    "COTRN01C",
+    "COTRN02C",
+    "COUSR00C",
+    "COUSR01C",
+    "COUSR02C",
+    "COUSR03C",
+    "CBEXPORT",
+    "CBIMPORT",
+    "CBACT04C",
+    "CBTRN02C",
+    "CBACT01C",
+    "CBACT02C",
+    "CBCUS01C",
+    "CBACT03C",
+    "CBTRN03C",
+    "COBSWAIT",
+    "CBSTM03A"
+  ],
+  "deadEnds": [
+    "COBSWAIT",
+    "CSUTLDTC",
+    "COCRDSEC"
+  ],
+  "observations": [
+    "COACTUPC (4,236 LOC, cyclomatic complexity 122) is a god-program mixing presentation, validation, and persistence \u2014 the single highest modernization risk and the first target for decomposition.",
+    "COMEN01C dispatches to 11 menu targets via a variable XCTL (CDEMO-MENU-OPT-PGMNAME array) with no PGMIDERR handler; option 11 (COPAUS0C, auth extension) will abend the CICS task if the extension is not installed.",
+    "USRSEC VSAM file stores user passwords in plaintext; ACCTDATA stores CVV in plaintext \u2014 both are hard security blockers that must not be replicated in the Java reimplementation.",
+    "CBTRN02C holds ACCTDATA and TRANSACT VSAM files exclusively during EOD processing \u2014 no concurrent CICS updates are possible during the batch window, creating an availability constraint.",
+    "CORPT00C and COMEN01C submit batch jobs via the CICS JOBS TDQ (INREADER), creating a runtime coupling between the online and batch tiers that is invisible from static analysis of either alone.",
+    "CBSTM03A calls CBSTM03B 13 times in a tight loop to format statement lines \u2014 the two programs should be extracted together as a single Statement Generation service.",
+    "The optional extensions (D9: IMS DB + DB2 + MQ) share no compile-time coupling with the base system; menu slots are wired in COMEN02Y/COADM02Y but guarded by PGMIDERR at runtime, making them safe to defer to a later modernization phase."
+  ],
+  "flows": [
+    {
+      "name": "Cardholder logs in and views account balance",
+      "persona": "Credit card holder",
+      "description": "A cardholder signs on to the system, navigates the menu, and views their account details and recent transactions.",
+      "steps": [
+        {
+          "label": "Enter user credentials at sign-on screen",
+          "nodes": [
+            "COSGN00C",
+            "ds:USRSEC",
+            "bms:COSGN00"
+          ]
+        },
+        {
+          "label": "Navigate to main menu and select Account View",
+          "nodes": [
+            "COMEN01C",
+            "bms:COMEN01"
+          ]
+        },
+        {
+          "label": "System retrieves account and customer records",
+          "nodes": [
+            "COACTVWC",
+            "ds:ACCTDATA",
+            "ds:CUSTFILE",
+            "bms:COACTVW"
+          ]
+        },
+        {
+          "label": "View transaction history list",
+          "nodes": [
+            "COTRN00C",
+            "ds:TRANSACT",
+            "bms:COTRN00"
+          ]
+        },
+        {
+          "label": "Drill into individual transaction detail",
+          "nodes": [
+            "COTRN01C",
+            "ds:TRANSACT",
+            "bms:COTRN01"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Administrator adds a new credit card",
+      "persona": "Bank administrator",
+      "description": "An admin user logs in, navigates the admin menu, adds a new card linked to an existing account, and sets the card limit.",
+      "steps": [
+        {
+          "label": "Admin signs on with admin credentials",
+          "nodes": [
+            "COSGN00C",
+            "ds:USRSEC"
+          ]
+        },
+        {
+          "label": "Navigate to admin menu",
+          "nodes": [
+            "COMEN01C",
+            "COADM01C",
+            "bms:COADM01"
+          ]
+        },
+        {
+          "label": "Select card list to find the account",
+          "nodes": [
+            "COCRDLIC",
+            "ds:CARDDATA",
+            "ds:CARDXREF",
+            "ds:ACCTDATA",
+            "bms:COCRDLI"
+          ]
+        },
+        {
+          "label": "Open card detail to initiate update",
+          "nodes": [
+            "COCRDSLC",
+            "ds:CARDDATA",
+            "bms:COCRDSL"
+          ]
+        },
+        {
+          "label": "Update card details and save",
+          "nodes": [
+            "COCRDUPC",
+            "ds:CARDDATA",
+            "ds:CARDXREF",
+            "bms:COCRDUP"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "End-of-day batch processes daily transactions",
+      "persona": "Operations scheduler (CA7 / Control-M)",
+      "description": "Nightly batch job chain validates daily transactions, posts them to accounts, recalculates interest, and produces statements.",
+      "steps": [
+        {
+          "label": "Validate and sort daily transaction file",
+          "nodes": [
+            "CBTRN01C",
+            "ds:DALYTRAN",
+            "ds:TRANSACT",
+            "ds:REPORT-OUTPUT"
+          ]
+        },
+        {
+          "label": "Post validated transactions to account balances",
+          "nodes": [
+            "CBTRN02C",
+            "ds:ACCTDATA",
+            "ds:TRANSACT",
+            "ds:DISCGRP",
+            "ds:TCATBALF"
+          ]
+        },
+        {
+          "label": "Recalculate interest for all accounts",
+          "nodes": [
+            "CBACT04C",
+            "ds:ACCTDATA",
+            "ds:TCATBALF"
+          ]
+        },
+        {
+          "label": "Generate account statements",
+          "nodes": [
+            "CBSTM03A",
+            "CBSTM03B",
+            "ds:ACCTDATA",
+            "ds:CUSTFILE",
+            "ds:TRANSACT",
+            "ds:STATEMENT-OUTPUT"
+          ]
+        },
+        {
+          "label": "Produce transaction category report",
+          "nodes": [
+            "CBTRN03C",
+            "ds:TRANSACT",
+            "ds:REPORT-OUTPUT"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cardholder pays their bill online",
+      "persona": "Credit card holder",
+      "description": "A cardholder initiates a bill payment through the online CICS interface, which posts the payment transaction.",
+      "steps": [
+        {
+          "label": "Sign on and navigate to billing menu",
+          "nodes": [
+            "COSGN00C",
+            "COMEN01C",
+            "ds:USRSEC"
+          ]
+        },
+        {
+          "label": "Open bill payment screen",
+          "nodes": [
+            "COBIL00C",
+            "ds:ACCTDATA",
+            "ds:TRANSACT",
+            "bms:COBIL00"
+          ]
+        },
+        {
+          "label": "Enter payment amount and confirm",
+          "nodes": [
+            "COBIL00C",
+            "ds:TRANSACT",
+            "ds:ACCTDATA"
+          ]
+        },
+        {
+          "label": "System posts payment and updates balance",
+          "nodes": [
+            "COBIL00C",
+            "ds:ACCTDATA"
+          ]
+        }
+      ]
+    }
+  ]
+}

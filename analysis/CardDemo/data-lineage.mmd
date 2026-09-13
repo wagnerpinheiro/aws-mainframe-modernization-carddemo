@@ -1,0 +1,73 @@
+graph LR
+
+    %% Online programs
+    COSGN00C([COSGN00C]):::online
+    COACTVWC([COACTVWC]):::online
+    COACTUPC([COACTUPC]):::online
+    COCRDLIC([COCRDLIC]):::online
+    COCRDUPC([COCRDUPC]):::online
+    COTRN02C([COTRN02C]):::online
+    COBIL00C([COBIL00C]):::online
+
+    %% Batch programs
+    CBTRN01C([CBTRN01C]):::batch
+    CBTRN02C([CBTRN02C]):::batch
+    CBACT04C([CBACT04C]):::batch
+    CBSTM03A([CBSTM03A]):::batch
+    CBEXPORT([CBEXPORT]):::batch
+
+    %% Data stores
+    ACCTDATA[(ACCTDATA)]:::vsam
+    CUSTFILE[(CUSTFILE)]:::vsam
+    CARDDATA[(CARDDATA)]:::vsam
+    CARDXREF[(CARDXREF)]:::vsam
+    USRSEC[(USRSEC)]:::vsam
+    TRANSACT[(TRANSACT)]:::vsam
+    DALYTRAN[(DALYTRAN)]:::vsam
+    DISCGRP[(DISCGRP)]:::vsam
+    TCATBALF[(TCATBALF)]:::gdg
+
+    %% Online reads
+    COSGN00C -->|read| USRSEC
+    COACTVWC -->|read| ACCTDATA
+    COACTVWC -->|read| CUSTFILE
+    COACTUPC -->|read| ACCTDATA
+    COACTUPC -->|read| CUSTFILE
+    COACTUPC ==>|write| ACCTDATA
+    COACTUPC ==>|write| CUSTFILE
+    COCRDLIC -->|read| CARDDATA
+    COCRDLIC -->|read| CARDXREF
+    COCRDLIC -->|read| ACCTDATA
+    COCRDUPC -->|read| CARDDATA
+    COCRDUPC ==>|write| CARDDATA
+    COTRN02C -->|read| TRANSACT
+    COTRN02C ==>|write| TRANSACT
+    COBIL00C -->|read| ACCTDATA
+    COBIL00C ==>|write| ACCTDATA
+    COBIL00C ==>|write| TRANSACT
+
+    %% Batch reads/writes
+    CBTRN01C -->|read| DALYTRAN
+    CBTRN01C ==>|write| TRANSACT
+    CBTRN02C -->|read| DALYTRAN
+    CBTRN02C -->|read| DISCGRP
+    CBTRN02C -->|read| TCATBALF
+    CBTRN02C ==>|write| ACCTDATA
+    CBTRN02C ==>|write| TRANSACT
+    CBTRN02C ==>|write| TCATBALF
+    CBACT04C -->|read| ACCTDATA
+    CBACT04C -->|read| DISCGRP
+    CBACT04C ==>|write| ACCTDATA
+    CBACT04C ==>|write| TCATBALF
+    CBSTM03A -->|read| ACCTDATA
+    CBSTM03A -->|read| CUSTFILE
+    CBSTM03A -->|read| TRANSACT
+    CBEXPORT -->|read| ACCTDATA
+    CBEXPORT -->|read| CUSTFILE
+    CBEXPORT -->|read| CARDDATA
+    CBEXPORT -->|read| TRANSACT
+
+    classDef online fill:#5b9bd5,stroke:#2e75b6,color:#fff
+    classDef batch fill:#70ad47,stroke:#538135,color:#fff
+    classDef vsam fill:#ffd966,stroke:#bf9000,color:#000
+    classDef gdg fill:#f4b942,stroke:#c96a00,color:#000
