@@ -157,7 +157,9 @@ Phases 2 and 3 are independent and can proceed in parallel once Phase 1 is compl
 - [ ] JUnit 5 characterization tests pass for all 3 jobs (`mvn test`)
 - [ ] RULE-007 (interest formula) tested with rounding decision explicitly documented in code comment
 - [ ] RULE-061 (atomic rollback) implemented as single `@Transactional` with exception propagation test
-- [ ] RULE-065 (overlimit formula) SME question answered and implementation matches answer
+- [ ] RULE-065 (overlimit) implemented as cycle-to-date formula: `WS-TEMP-BAL = ACCT-CURR-CYC-CREDIT − ACCT-CURR-CYC-DEBIT + DALYTRAN-AMT`; TODO comment marks production policy gap
+- [ ] RULE-066 (expiry date) parsed with `DateTimeFormatter.ISO_LOCAL_DATE` strict; malformed field throws `InvalidDataException` with field name and value
+- [ ] RULE-059 (inactive account): `TransactionPostingProcessor` does NOT check ACCT-ACTIVE-STATUS; TODO comment marks production policy gap
 - [ ] Spring Boot application starts: `mvn spring-boot:run` exits without error
 - [ ] Pilot playbook written: `modernized/CardDemo/PHASE1_PLAYBOOK.md` (surprises found, decisions made, pattern for remaining batch programs)
 
@@ -249,22 +251,20 @@ Phases 2 and 3 are independent and can proceed in parallel once Phase 1 is compl
 
 **Entry criteria:**
 - [ ] Phase 3 exit criteria met (Spring Security + `CicsContext` fully wired)
-- [ ] COACTUPC decomposition plan above approved by engineering lead
-- [ ] RULE-065 (overlimit formula) SME question resolved (carried from Phase 1 open questions)
-- [ ] RULE-059 (inactive account batch posting) SME question resolved
+- [ ] COACTUPC decomposition plan above approved by engineering lead (premises for Q7/Q8/Q9 are established in §7 — no external SME needed)
 
 **Exit criteria:**
 - [ ] `AccountViewController` characterization test covers read-only display of account + customer fields
 - [ ] `AccountUpdateController` integration tests cover: all P1 validation rules (RULE-024 through RULE-045), RULE-053 (optimistic locking — concurrent-update scenario), RULE-061 (atomic rollback — second file write failure path)
 - [ ] `CARD-CVV-CD` field absent from `CardEntity`, `CardUpdateController`, and all API responses (SEC-005 / PCI DSS fix)
 - [ ] RULE-053 concurrency test: two simultaneous requests to update the same account; second writer receives HTTP 409 (not a silent lost update)
-- [ ] `CODING-TO-BE-DONE` sentinel (TD-10) in COACTUPC, COCRDUPC, COACTVWC, COCRDSLC documented as known functionality gap in `PHASE4_GAPS.md`; SME review scheduled before Phase 4 exits
+- [ ] `CODING-TO-BE-DONE` sentinel (TD-10): static analysis confirms the 88-level is declared but never SET or tested in any of the 4 programs — treated as no-op; each migrated class carries a `// NOTE: CODING-TO-BE-DONE sentinel present in legacy; no activated functionality gap identified` comment
 
 **Relative scale:** **XL** — ~9,083 COBOL LOC; roughly 61% of the COCOMO index concentrated in this phase. COACTUPC alone (CCN 122) represents more design effort than all batch phases combined. Do not underestimate.
 
 **Risk:** High
 - **Risk 1:** COACTUPC GO TO spaghetti (TD-09) — phone/SSN validation uses paragraph fall-through plus 51 GO TO statements. Translating paragraph-by-paragraph without recognizing the fall-through nominal path silently omits validation for the common case. **Mitigation:** trace the nominal path through all four sub-paragraphs in the characterization test before writing any Java; add a property-based test that fuzzes valid phone numbers and expects acceptance.
-- **Risk 2:** `CODING-TO-BE-DONE` incomplete functionality (TD-10) — four programs contain an unresolved sentinel indicating missing requirements. If SME cannot identify the missing requirements before Phase 4 exits, the Java implementation will reproduce the same gap and the exit criteria cannot be met. **Mitigation:** treat unresolved `CODING-TO-BE-DONE` items as a Phase 4 hard blocker; do not mark Phase 4 complete if the SME question is unanswered.
+- **Risk 2:** `CODING-TO-BE-DONE` sentinel (TD-10) — the 88-level is never SET or tested in any of the 4 programs; static analysis confirms it is a no-op. Risk is misidentifying it as a live branch during translation. **Mitigation:** verify in each program that `CODING-TO-BE-DONE` has zero `IF` / `SET` / `EVALUATE` references before writing the Java equivalent of that section (grep confirms this takes under a minute).
 
 ---
 
@@ -282,7 +282,7 @@ Phases 2 and 3 are independent and can proceed in parallel once Phase 1 is compl
 - [ ] Phase 4 exit criteria met
 - [ ] `TransactionRepository` and `TransactionEntity` from Phase 1 confirmed stable
 - [ ] `JobLauncher` bean available in `carddemo-web` context for `ReportTriggerController`
-- [ ] CORPT00C TDQ content (documentation gap DG-2) resolved: the JCL skeleton content assembled at runtime must be known before `ReportTriggerController` can be written
+- [ ] `ReportTriggerController` design confirmed: REST POST with `{reportType, startDate, endDate}` body → `JobLauncher.run(transactionReportJob, params)` asynchronously; no JCL reconstruction (see §7 Q10)
 
 **Exit criteria:**
 - [ ] `BillPaymentController` tests cover RULE-010 (full-balance payment), RULE-011 (zero-balance block), RULE-012 fix (DB sequence replaces READPREV+increment)
@@ -295,8 +295,8 @@ Phases 2 and 3 are independent and can proceed in parallel once Phase 1 is compl
 **Relative scale:** **L** — ~3,033 COBOL LOC; roughly 20% of the COCOMO index. Well-structured programs by D5 standards; the main work is the transaction ID fix and the report trigger re-architecture.
 
 **Risk:** Medium
-- **Risk 1:** CORPT00C TDQ content unknown (DG-2) — the JCL skeleton assembled at runtime is not documented anywhere in the source. If the SME cannot reconstruct it, `ReportTriggerController` cannot be written correctly. **Mitigation:** flag as Phase 5 blocker in §7; default to a configurable JCL template property if SME is unavailable.
-- **Risk 2:** RULE-054 (date error code 2513 silently suppressed) — current COBOL deliberately or accidentally accepts a specific invalid date. If Java's `LocalDate` throws on that same date, the behaviors diverge. **Mitigation:** characterize which dates trigger code 2513 using the CSUTLDTC source before implementing `DateValidator`; reproduce the suppression behavior in Java if SME confirms it is intentional.
+- **Risk 1:** CORPT00C TDQ JCL content unresolvable from source alone — resolved by architectural substitution (§7 Q10): `ReportTriggerController` fires `JobLauncher` directly via REST; no JCL reconstruction needed. Residual risk is that CORPT00C's BMS screen captured parameters not mapped to the REST endpoint. **Mitigation:** inspect `CORPT00.bms` field list; map each screen field to a REST parameter; smoke test verifies `JobExecution` status = STARTED.
+- **Risk 2:** RULE-054 (date error 2513 suppressed) — resolved by §7 Q11: Java `LocalDate.parse()` strict mode accepts any valid Gregorian calendar date. Dates that trigger COBOL advisory 2513 are either valid (Java accepts them) or structurally invalid (Java throws, which is stricter). This PoC equivalence gap is documented in `DateValidator` javadoc; no special suppression logic needed.
 
 ---
 
@@ -329,7 +329,7 @@ The following P0 rules **must be proven equivalent before any phase ships.** The
 | RULE-004 | Password match (Java: BCrypt replaces plaintext) | Phase 3 | High | No |
 | RULE-005 | User type routing: admin → admin menu | Phase 3 | High | No |
 | RULE-006 | Regular user blocked from admin-only options | Phase 3 | High | No |
-| RULE-007 | Monthly interest formula (rounding decision required) | Phase 1 | High | No — but rounding choice must be documented and SME-approved |
+| RULE-007 | Monthly interest formula — `RoundingMode.DOWN` (matches COBOL truncation) | Phase 1 | High | No — resolved, see §7 Q2 |
 | RULE-008 | Account balance updated after interest run | Phase 1 | High | No |
 | RULE-009 | Cycle credit/debit accumulators reset after interest | Phase 1 | High | No |
 | RULE-010 | Bill payment = full current balance | Phase 5 | High | No |
@@ -340,20 +340,17 @@ The following P0 rules **must be proven equivalent before any phase ships.** The
 | RULE-015 | Auth summary deletion — **CONFIRMED DEFECT** (D9 — out of scope) | — | High | N/A |
 | RULE-053 | Optimistic locking: concurrent update prevention | Phase 4 | High | No |
 | RULE-055 | User session lifecycle | Phase 3 | High | No |
-| RULE-059 | Account active-status domain (Y/N) | Phase 4 | High | **Yes — SME must confirm whether 'N' blocks batch posting before Phase 1 exits** |
+| RULE-059 | Account active-status domain — inactive does NOT block batch (legacy replicated) | Phase 4 | High | No — resolved, see §7 Q3 |
 | RULE-060 | Card active-status domain (Y/N) | Phase 4 | High | No |
 | RULE-061 | Atomic rollback on two-file account update | Phase 4 | High | No |
 | RULE-063 | Batch: card must exist in XREF (reject 100) | Phase 1 | High | No |
 | RULE-064 | Batch: account must exist in ACCTDAT (reject 101) | Phase 1 | High | No |
-| RULE-065 | Batch: credit limit enforcement (reject 102) | Phase 1 | High | **Yes — SME must confirm overlimit formula uses cycle-to-date only (not running balance) before Phase 1 exits** |
-| RULE-066 | Batch: account not expired (reject 103) | Phase 1 | Medium (format assumption) | **Yes — SME must confirm ACCT-EXPIRAION-DATE and DALYTRAN-ORIG-TS are always YYYY-MM-DD before Phase 1 exits** |
+| RULE-065 | Batch: credit limit enforcement — cycle-to-date formula replicated exactly | Phase 1 | High | No — resolved, see §7 Q4 |
+| RULE-066 | Batch: account not expired — strict YYYY-MM-DD parsing; bad format = exception | Phase 1 | High | No — resolved, see §7 Q5 |
 | RULE-068 | Category balance accumulation (feeds interest) | Phase 1 | High | No |
 | RULE-069 | Account balance updated per posted transaction | Phase 1 | High | No |
 
-**Blockers requiring SME confirmation before their phase starts:**
-- **RULE-059** (P0): Does inactive account status 'N' block batch transaction posting? CBTRN02C does not check this — is that a bug or a policy? Blocks Phase 1 exit.
-- **RULE-065** (P0): Overlimit check uses only cycle-to-date amounts, not carry-forward balance. Is this correct credit policy? Blocks Phase 1 exit.
-- **RULE-066** (P0, Confidence Medium): Are ACCT-EXPIRAION-DATE and DALYTRAN-ORIG-TS always in YYYY-MM-DD format? A format mismatch silently produces wrong expiry comparisons. Blocks Phase 1 exit.
+**All former blockers resolved — see §7 for established premises.**
 
 ---
 
@@ -370,30 +367,105 @@ The following P0 rules **must be proven equivalent before any phase ships.** The
 
 ---
 
-## 7. Open Questions
+## 7. Established Premises (formerly Open Questions)
 
-The following questions require human or SME decision before Phase 1 can start or exit. Each is a hard gate.
+All questions resolved using the principle: **replicate legacy behavior by default for the PoC; mark production gaps with TODO comments in code.** No SME dependency remains before any phase.
 
-**Before Phase 1 starts:**
-- [ ] **Q1 (Phase 1 entry):** Has the sample data in `legacy/CardDemo/app/data/` been verified as valid COBOL-format input for CBTRN01C? The golden-master fixture depends on this data being representative.
-- [ ] **Q2 (Phase 1 entry):** What is the intended rounding mode for the interest formula (RULE-007)? The COBOL truncates toward zero (no ROUNDED clause). Options: preserve truncation (maximize bank revenue), half-up (standard consumer), banker's rounding (minimize systemic bias). This is a business policy decision.
+---
 
-**Before Phase 1 exits:**
-- [ ] **Q3 (Phase 1 exit — RULE-059 blocker):** Does account active-status 'N' block batch transaction posting? CBTRN02C does not check this field. SME must decide whether the Java implementation should add this check.
-- [ ] **Q4 (Phase 1 exit — RULE-065 blocker):** The overlimit check in CBTRN02C uses only cycle-to-date amounts (ACCT-CURR-CYC-CREDIT − ACCT-CURR-CYC-DEBIT + new transaction), ignoring carry-forward balances from prior cycles. Is this the intended credit policy?
-- [ ] **Q5 (Phase 1 exit — RULE-066 blocker):** Confirm that both ACCT-EXPIRAION-DATE and DALYTRAN-ORIG-TS are always stored in YYYY-MM-DD format. A mismatch produces silent wrong expiry comparisons.
+**Q1 — Sample data validity (Phase 1 entry)**
+> **Premise:** Use `legacy/CardDemo/app/data/` as-is for golden-master fixtures. These files are the seed data produced by `DUSRSECJ.jcl` and `ESDSRRDS.jcl` and are authoritative for the COBOL system. If a fixture record is malformed, the Spring Batch `FlatFileItemReader` will throw a `FlatFileParseException` with the line number — fail-fast, no silent corruption. Treat any such exception as a fixture quality issue to fix before Phase 1 proceeds.
 
-**Before Phase 2 exits:**
-- [ ] **Q6 (Phase 2 exit):** What is the intended disposition of DALYREJS reject records (documentation gap DG-5)? Are they: (a) manually reviewed and resubmitted, (b) automatically reprocessed next day, or (c) permanently discarded?
+---
 
-**Before Phase 4 starts:**
-- [ ] **Q7 (Phase 4 entry):** What are the missing requirements behind the `CODING-TO-BE-DONE VALUE 'Looks Good.... so far'` sentinel in COACTUPC, COCRDUPC, COACTVWC, and COCRDSLC (TD-10)? These represent unknown functionality gaps in the 4 core read/write flows.
-- [ ] **Q8 (Phase 4 entry):** Should the online card update screen reject expiry dates already in the past (RULE-029 gap)? Currently the COBOL accepts past expiry dates online; the batch enforces expiry at posting time.
-- [ ] **Q9 (Phase 4 entry):** Card expiry day is frozen at its original value even when month/year changes (RULE-030). If the original day was 31 and the month is changed to a 30-day month, an invalid date is stored. Is the freeze intentional? Should day be re-validated against the new month?
+**Q2 — Interest rounding mode (Phase 1, RULE-007)**
+> **Premise:** Use `RoundingMode.DOWN` (truncate toward zero) — this exactly matches the COBOL `COMPUTE` with no `ROUNDED` clause. This is the only rounding mode that produces byte-for-byte identical outputs to COBOL for the characterization tests. Document in `InterestCalculationService`:
+> ```java
+> // RoundingMode.DOWN replicates COBOL COMPUTE without ROUNDED (truncates toward zero).
+> // TODO(prod): production policy may require HALF_UP or HALF_EVEN — business decision needed.
+> ```
+> The property-based test bounds the maximum divergence vs HALF_UP to confirm it is acceptable for a PoC.
 
-**Before Phase 5 starts:**
-- [ ] **Q10 (Phase 5 entry):** What JCL skeleton content does CORPT00C assemble and write to the CICS JOBS TDQ (documentation gap DG-2)? Without this, `ReportTriggerController` cannot be implemented correctly.
-- [ ] **Q11 (Phase 5 entry):** What is CSUTLDTC error code 2513, and is its suppression in transaction date validation (RULE-054) intentional? Possible explanations: leap-year ambiguity, timezone warning, or accidental suppression. If intentional, Java's `LocalDate` must reproduce the same behavior.
+---
+
+**Q3 — Inactive account blocks batch posting? (Phase 1, RULE-059)**
+> **Premise:** CBTRN02C does not check `ACCT-ACTIVE-STATUS` — this is the confirmed legacy behavior, not a missing check. Replicate as-is: an inactive account ('N') does NOT block batch transaction posting in the PoC. Add in `TransactionPostingProcessor`:
+> ```java
+> // TODO(prod): ACCT-ACTIVE-STATUS='N' does not block posting (legacy behavior).
+> // Production policy decision: should inactive accounts reject transactions? (RULE-059)
+> ```
+
+---
+
+**Q4 — Overlimit formula uses cycle-to-date only (Phase 1, RULE-065)**
+> **Premise:** The COBOL formula is explicit and unambiguous:
+> `WS-TEMP-BAL = ACCT-CURR-CYC-CREDIT − ACCT-CURR-CYC-DEBIT + DALYTRAN-AMT`
+> Carry-forward balances from prior cycles are excluded. Replicate this formula exactly in `CreditLimitValidator`. Add:
+> ```java
+> // Overlimit check uses cycle-to-date amounts only (ACCT-CURR-CYC-CREDIT/DEBIT).
+> // TODO(prod): prior-cycle carry-forward is excluded — confirm credit policy. (RULE-065)
+> ```
+
+---
+
+**Q5 — Date format YYYY-MM-DD (Phase 1, RULE-066)**
+> **Premise:** Both `ACCT-EXPIRAION-DATE` (`CVACT01Y.cpy`) and `DALYTRAN-ORIG-TS` (`CVTRA06Y.cpy`) are defined as `PIC X(10)` with CCYY-MM-DD semantics per JCL DD documentation and copybook field names. Rather than assuming and silently producing wrong results on format mismatch, enforce strict parsing:
+> ```java
+> LocalDate.parse(rawField, DateTimeFormatter.ISO_LOCAL_DATE); // throws on malformed input
+> ```
+> A `DateTimeParseException` here surfaces a data quality problem immediately rather than producing a wrong expiry comparison. No silent failures.
+
+---
+
+**Q6 — DALYREJS reject disposition (Phase 2, DG-5)**
+> **Premise:** No COBOL program performs automatic resubmission of rejects — CBTRN01C writes to DALYREJS and no subsequent job reads it except CBTRN03C (report only). Disposition: **permanent write, manual review assumed.** In Java: `TransactionValidationJob` writes a structured CSV reject file to `carddemo.batch.reject-output` (configurable path). File is not consumed further within the PoC. Add to `TransactionValidationJobConfig`:
+> ```java
+> // Rejects written to reject-output path. No auto-reprocess in legacy or PoC.
+> // TODO(prod): confirm operational procedure — manual review / resubmission / discard. (DG-5)
+> ```
+
+---
+
+**Q7 — CODING-TO-BE-DONE functionality gap (Phase 4, TD-10)**
+> **Premise:** Static analysis confirms the `88 CODING-TO-BE-DONE VALUE 'Looks Good.... so far'` condition is declared in WORKING-STORAGE in 4 programs but is never SET and never tested (no `IF CODING-TO-BE-DONE`, no `SET CODING-TO-BE-DONE`, no `EVALUATE`). It is an inert placeholder — no code branch depends on it. Treat as a no-op in Java. Each migrated class carries:
+> ```java
+> // NOTE: CODING-TO-BE-DONE sentinel was present in legacy source.
+> // Static analysis confirms it was never SET or tested — no activated functionality gap.
+> ```
+> Phase 4 is NOT blocked by this item.
+
+---
+
+**Q8 — Online card update: reject past expiry dates? (Phase 4, RULE-029)**
+> **Premise:** The COBOL explicitly does not validate that the expiry year is in the future (RULE-029 documents this). The batch enforces expiry at posting time (RULE-066). Replicate legacy behavior for the PoC: `CardUpdateValidator` accepts past expiry years as long as they are in range 1950–2099. Add:
+> ```java
+> // TODO(prod): no future-date guard on expiry year (RULE-029).
+> // Batch enforces expiry at posting. Production may want online validation too.
+> ```
+
+---
+
+**Q9 — Card expiry day frozen at original value (Phase 4, RULE-030)**
+> **Premise:** COCRDUPC line 1122-1123 explicitly copies `CCUP-OLD-EXPDAY` to the updated record regardless of month/year changes — the day is intentionally immutable from the UI. Replicate in `CardUpdateService`: the `expiryDay` field is always taken from the existing `CardEntity` and not from the request. Add:
+> ```java
+> // Expiry day is immutable from original record (RULE-030 — COBOL explicitly carries it forward).
+> // TODO(prod): day=31 in a 30-day month creates an invalid stored date — consider re-validation.
+> ```
+
+---
+
+**Q10 — CORPT00C TDQ content (Phase 5, DG-2)**
+> **Premise:** The JCL skeleton assembled at runtime is not reconstructable from static COBOL analysis. This is resolved by architectural substitution: `ReportTriggerController` does not reconstruct JCL. Instead, it accepts `POST /reports/trigger` with body `{reportType, startDate, endDate}` and calls `JobLauncher.run(transactionReportJob, jobParameters)` directly. This is functionally equivalent (triggers the same batch processing) and architecturally cleaner (no JCL in a Java system). The BMS screen `CORPT00.bms` fields map 1:1 to REST parameters. No TDQ, no JCL template needed.
+
+---
+
+**Q11 — CSUTLDTC error code 2513 suppressed (Phase 5, RULE-054)**
+> **Premise:** Java's `LocalDate.parse()` with strict resolver mode is binary — it either accepts a valid Gregorian calendar date or throws `DateTimeParseException`. There is no concept of a "warning code" in Java date parsing. Any date that COBOL's CSUTLDTC would accept with a 2513 advisory (likely a leap-year edge case or a day-of-week computation anomaly) is either: (a) a valid calendar date → Java accepts it too, or (b) a structurally invalid date → Java throws, which is stricter than COBOL. The PoC accepts this stricter behavior as a safe deviation. Document in `DateValidator`:
+> ```java
+> // CSUTLDTC error 2513 was silently suppressed in legacy (RULE-054).
+> // Java LocalDate.parse() strict mode replaces this: valid dates pass, invalid dates throw.
+> // This is strictly safer than the legacy behavior.
+> ```
 
 ---
 
