@@ -3,10 +3,13 @@ package com.carddemo.batch.eod;
 import com.carddemo.common.CobolDisplayParser;
 import com.carddemo.domain.entity.AccountEntity;
 import com.carddemo.domain.entity.CardXRefEntity;
+import com.carddemo.domain.entity.DiscountGroupEntity;
+import com.carddemo.domain.entity.DiscountGroupId;
 import com.carddemo.domain.entity.TranCatBalanceEntity;
 import com.carddemo.domain.entity.TranCatBalanceId;
 import com.carddemo.domain.repository.AccountRepository;
 import com.carddemo.domain.repository.CardXRefRepository;
+import com.carddemo.domain.repository.DiscountGroupRepository;
 import com.carddemo.domain.repository.TranCatBalanceRepository;
 import org.springframework.core.io.ClassPathResource;
 
@@ -169,6 +172,35 @@ public final class FixtureLoader {
 
             TranCatBalanceId id = new TranCatBalanceId(accountId, typeCode, categoryCode);
             entities.add(new TranCatBalanceEntity(id, balance));
+        }
+        repo.saveAll(entities);
+    }
+
+    /**
+     * Parses {@code fixtures/discgrp.txt} (50 bytes per line per CVTRA02Y) and saves
+     * all entries to the given repository.  Used by {@link InterestCalculationJobTest}.
+     *
+     * <p>Layout (0-indexed byte ranges):
+     * <ul>
+     *   <li>[0:10]  DIS-ACCT-GROUP-ID — stored stripped (trailing spaces removed)</li>
+     *   <li>[10:12] DIS-TRAN-TYPE-CD</li>
+     *   <li>[12:16] DIS-TRAN-CAT-CD — parsed as {@code Integer}</li>
+     *   <li>[16:22] DIS-INT-RATE — S9(4)V99 sign-overpunch, 2 implied decimals</li>
+     *   <li>[22:50] FILLER — skipped</li>
+     * </ul>
+     */
+    public static void loadDiscountGroups(DiscountGroupRepository repo,
+                                          String classpathPath) throws IOException {
+        List<DiscountGroupEntity> entities = new ArrayList<>();
+        for (String line : readLines(classpathPath)) {
+            if (line.isBlank()) continue;
+            String groupId      = line.substring(0, 10).stripTrailing();
+            String typeCode     = line.substring(10, 12);
+            int    categoryCode = Integer.parseInt(line.substring(12, 16).strip());
+            BigDecimal rate     = CobolDisplayParser.parseSignedAmount(line.substring(16, 22), 2);
+
+            entities.add(new DiscountGroupEntity(
+                new DiscountGroupId(groupId, typeCode, categoryCode), rate));
         }
         repo.saveAll(entities);
     }

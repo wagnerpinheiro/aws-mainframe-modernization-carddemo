@@ -103,8 +103,38 @@ CBTRN02C (`legacy/CardDemo/app/cbl/CBTRN02C.cbl`, 731 LOC per brief) is the actu
 | RULE-064 (account exists) tested | ✅ `accountNotFoundGoesToReject` |
 | Spring Boot application context starts | ✅ (Spring Batch auto-config, H2 in-memory) |
 | PHASE1_PLAYBOOK.md written | ✅ this document |
-| RULE-007, RULE-061, RULE-065, RULE-066 tested | ⏳ CBTRN02C + CBACT04C pending |
-| `TransactionPostingJob` compiles and tests pass | ⏳ CBTRN02C pending |
-| `InterestCalculationJob` compiles and tests pass | ⏳ CBACT04C pending |
+| RULE-007 (RoundingMode.DOWN) tested + documented | ✅ `InterestCalculationJobTest#rule007_roundingDown_notHalfUp` |
+| RULE-008 (balance updated after interest) | ✅ `#rule008_accountBalanceUpdated` |
+| RULE-009 (cycle accumulators reset) | ✅ `#rule009_cycleAccumulatorsReset` |
+| RULE-059 (inactive account not blocked) | ✅ `TransactionPostingJobTest#rule059_inactiveAccountIsPosted` |
+| RULE-061 (atomic rollback) | ✅ `#rule061_atomicRollback` |
+| RULE-065 (overlimit cycle-to-date formula) | ✅ `#rejectCode102_overlimit` |
+| RULE-066 (expiry strict parsing) | ✅ `#rejectCode103_accountExpired` |
+| `TransactionPostingJob` compiles and tests pass | ✅ 10/10 |
+| `InterestCalculationJob` compiles and tests pass | ✅ 8/8 |
+| `mvn spring-boot:run` exits without error | ✅ started in 1.1s |
+| All Phase 1 tests: `mvn test` | ✅ **25/25 GREEN** |
 
-Phase 1 is not fully complete until CBTRN02C and CBACT04C are also transformed and tested.
+**Phase 1 is COMPLETE.** All exit criteria are met.
+
+---
+
+## CBACT04C findings
+
+### S4 — Account groupId is blank in fixture accounts
+
+All fixture accounts have blank ACCT-GROUP-ID (`""`). The DISCGRP lookup always falls
+back to the DEFAULT group (status '23' → `MOVE 'DEFAULT' TO FD-DIS-ACCT-GROUP-ID`).
+The `A000000000` group in discgrp.txt is not exercised by the fixture data.
+The ZEROAPR group has all-zero rates (no interest).
+
+### S5 — TCATBAL is read SEQUENTIALLY with account-change detection
+
+CBACT04C opens TCATBAL-FILE with `ACCESS MODE IS SEQUENTIAL` (not RANDOM). The program
+detects account changes by comparing `TRANCAT-ACCT-ID` with `WS-LAST-ACCT-NUM`. This
+stateful accumulation pattern requires a Tasklet (not a chunk-oriented Step) in Spring Batch.
+
+### S6 — 1400-COMPUTE-FEES is a no-op ("To be implemented")
+
+Paragraph 1400-COMPUTE-FEES contains only `EXIT`. No fee computation exists in the legacy.
+Not translated; documented in `InterestCalculationTasklet` comment.
