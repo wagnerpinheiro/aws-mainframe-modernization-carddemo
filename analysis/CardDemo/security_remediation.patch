@@ -1,0 +1,442 @@
+# CardDemo Security Remediation Patch — Shareable
+# Apply from project root: git apply analysis/CardDemo/security_remediation.patch
+# Credential hunks are in security_remediation.local.patch (gitignored; not for sharing).
+#
+# NOTE on IDOR findings (SEC-015/016/017/018):
+#   UserEntity has no FK to CustomerEntity/AccountEntity. Until a user→account ownership
+#   link is added to the schema, these patches restrict account/card/billing/transaction
+#   access to ROLE_ADMIN as a temporary guard. See SECURITY_FINDINGS.md for the
+#   production remediation path (add customer_id to app_user table + OwnershipService).
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-004: Never send stored password to 3270 update screen (two hunks in COUSR02C.cbl)
+# Hunk 1: remove the MOVE SEC-USR-PWD to screen field in PROCESS-ENTER-KEY
+# Hunk 2: change the WHEN PASSWDI=SPACES branch to CONTINUE (not an error),
+#          since the blank field now means "keep existing" not "user forgot to type"
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/legacy/CardDemo/app/cbl/COUSR02C.cbl b/legacy/CardDemo/app/cbl/COUSR02C.cbl
+--- a/legacy/CardDemo/app/cbl/COUSR02C.cbl
++++ b/legacy/CardDemo/app/cbl/COUSR02C.cbl
+@@ -166,7 +166,8 @@
+            IF NOT ERR-FLG-ON
+                MOVE SEC-USR-FNAME      TO FNAMEI    OF COUSR2AI
+                MOVE SEC-USR-LNAME      TO LNAMEI    OF COUSR2AI
+-               MOVE SEC-USR-PWD        TO PASSWDI   OF COUSR2AI
++      *    SEC-004: password field left blank intentionally — never pre-populate.
++      *    Blank PASSWDI on the update screen now means "keep existing password".
+                MOVE SEC-USR-TYPE       TO USRTYPEI  OF COUSR2AI
+                PERFORM SEND-USRUPD-SCREEN
+            END-IF.
+@@ -198,8 +199,7 @@
+               WHEN PASSWDI OF COUSR2AI = SPACES OR LOW-VALUES
+-                  MOVE 'Y'     TO WS-ERR-FLG
+-                  MOVE 'Password can NOT be empty...' TO
+-                                  WS-MESSAGE
+-                  MOVE -1       TO PASSWDL OF COUSR2AI
+-                  PERFORM SEND-USRUPD-SCREEN
++      *    SEC-004: blank = keep existing stored password; not an error after pre-fill removed.
++                  CONTINUE
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-009: Assert CDEMO-USRTYP-ADMIN in CICS admin programs
+#
+# COUSR01C and COUSR02C use RETURN-TO-PREV-SCREEN (not RETURN-TO-SIGNON-SCREEN).
+# The admin check must go INSIDE the ELSE branch, AFTER the COMMAREA is copied,
+# so that CDEMO-USRTYP-ADMIN is readable from CARDDEMO-COMMAREA.
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/legacy/CardDemo/app/cbl/COUSR01C.cbl b/legacy/CardDemo/app/cbl/COUSR01C.cbl
+--- a/legacy/CardDemo/app/cbl/COUSR01C.cbl
++++ b/legacy/CardDemo/app/cbl/COUSR01C.cbl
+@@ -78,6 +78,12 @@
+            IF EIBCALEN = 0
+                MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM
+                PERFORM RETURN-TO-PREV-SCREEN
+            ELSE
+                MOVE DFHCOMMAREA(1:EIBCALEN) TO CARDDEMO-COMMAREA
++      *    SEC-009: EIBCALEN > 0 does not prove admin role — check COMMAREA explicitly.
++      *    Must appear after COMMAREA copy so CDEMO-USRTYP-ADMIN is populated.
++               IF NOT CDEMO-USRTYP-ADMIN
++                   MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM
++                   PERFORM RETURN-TO-PREV-SCREEN
++               END-IF
+                IF NOT CDEMO-PGM-REENTER
+
+diff --git a/legacy/CardDemo/app/cbl/COUSR02C.cbl b/legacy/CardDemo/app/cbl/COUSR02C.cbl
+--- a/legacy/CardDemo/app/cbl/COUSR02C.cbl
++++ b/legacy/CardDemo/app/cbl/COUSR02C.cbl
+@@ -90,6 +90,12 @@
+            IF EIBCALEN = 0
+                MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM
+                PERFORM RETURN-TO-PREV-SCREEN
+            ELSE
+                MOVE DFHCOMMAREA(1:EIBCALEN) TO CARDDEMO-COMMAREA
++      *    SEC-009: verify admin role from COMMAREA before proceeding.
++      *    Must appear after COMMAREA copy so CDEMO-USRTYP-ADMIN is populated.
++               IF NOT CDEMO-USRTYP-ADMIN
++                   MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM
++                   PERFORM RETURN-TO-PREV-SCREEN
++               END-IF
+                IF NOT CDEMO-PGM-REENTER
+
+diff --git a/legacy/CardDemo/app/cbl/COADM01C.cbl b/legacy/CardDemo/app/cbl/COADM01C.cbl
+--- a/legacy/CardDemo/app/cbl/COADM01C.cbl
++++ b/legacy/CardDemo/app/cbl/COADM01C.cbl
+@@ -83,6 +83,10 @@
+       *----------------------------------------------------------------*
+        MAIN-PARA.
+            IF EIBCALEN = 0
++               PERFORM RETURN-TO-SIGNON-SCREEN
++           END-IF.
++      *    SEC-009: verify admin role from COMMAREA before proceeding.
++           IF NOT CDEMO-USRTYP-ADMIN
+                PERFORM RETURN-TO-SIGNON-SCREEN
+            END-IF.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-015: Account IDOR — restrict to ADMIN until user→account ownership exists
+# AccountViewController: import is new (not pre-existing); fixes INTRODUCES-RISK verdict
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountViewController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountViewController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountViewController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountViewController.java
+@@ -1,5 +1,6 @@
+ package com.carddemo.web.account;
+
++import org.springframework.security.access.prepost.PreAuthorize;
+ import org.springframework.stereotype.Controller;
+ import org.springframework.ui.Model;
+ import org.springframework.web.bind.annotation.GetMapping;
+@@ -7,6 +8,12 @@
+  * Read-only account view. Corresponds to COACTVWC.cbl (941 LOC).
+  *
++ * SEC-015: Restricted to ROLE_ADMIN until user→account ownership link is implemented.
++ * Production path: add customer_id to app_user, resolve via CardXRefRepository, and
++ * replace @PreAuthorize with ownershipService.ownsAccount(authentication, id) check.
++ *
+  * COACTVWC reads ACCTDATA (random) and CUSTFILE (via XREF) and displays the result.
+  * No write logic, no validation. Simplest D3 program — used as Phase 4 pilot.
+  */
+ @Controller
+ @RequestMapping("/accounts")
++@PreAuthorize("hasRole('ADMIN')")
+ public class AccountViewController {
+
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountUpdateController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountUpdateController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountUpdateController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountUpdateController.java
+@@ -1,5 +1,6 @@
+ package com.carddemo.web.account;
+
++import org.springframework.security.access.prepost.PreAuthorize;
+ import com.carddemo.domain.entity.AccountEntity;
+ import com.carddemo.domain.entity.CustomerEntity;
+@@ -34,6 +35,8 @@
+  * RULE-053: optimistic locking — stale form version → HTTP 409 Conflict.
+  *
++ * SEC-015: Restricted to ROLE_ADMIN until user→account ownership link is implemented.
+  * NOTE: CODING-TO-BE-DONE sentinel present in legacy; no activated functionality gap identified.
+  */
+ @Controller
+ @RequestMapping("/accounts")
++@PreAuthorize("hasRole('ADMIN')")
+ public class AccountUpdateController {
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-016: Card IDOR — remove false JavaDoc, restrict to ADMIN
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardListController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardListController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardListController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardListController.java
+@@ -9,8 +9,10 @@
+  * Card list screen. Corresponds to COCRDLIC.cbl.
+  *
+- * Scope enforcement: non-admin sees only cards for their account.
+- * Admin sees all cards (or cards for a specific account).
++ * SEC-016: Scope enforcement is NOT implemented — UserEntity has no FK to account/card.
++ * Restricted to ROLE_ADMIN until user→account ownership model is added.
++ * Remove @PreAuthorize and add ownershipService.ownsAccount() check when model is ready.
+  *
+  * RULE-060: card active status domain (Y/N) shown in list.
+  * SEC-005: no CVV field in any response.
+  */
+ @Controller
+ @RequestMapping("/accounts/{accountId}/cards")
++@PreAuthorize("hasRole('ADMIN')")
+ public class CardListController {
+
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardDetailController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardDetailController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardDetailController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardDetailController.java
+@@ -1,5 +1,6 @@
+ package com.carddemo.web.card;
+
++import org.springframework.security.access.prepost.PreAuthorize;
+ import com.carddemo.domain.repository.CardRepository;
+ import org.springframework.stereotype.Controller;
+@@ -12,7 +13,9 @@
+  * Read-only card detail screen. Corresponds to COCRDSLC.cbl.
+  *
++ * SEC-016: Restricted to ROLE_ADMIN until user→card ownership link is implemented.
+  * RULE-031: card must exist in CARDDAT before detail is shown.
+  * SEC-005: CVV field absent — not queried, not displayed.
+  */
+ @Controller
+ @RequestMapping("/cards")
++@PreAuthorize("hasRole('ADMIN')")
+ public class CardDetailController {
+
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardUpdateController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardUpdateController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardUpdateController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/card/CardUpdateController.java
+@@ -1,5 +1,6 @@
+ package com.carddemo.web.card;
+
++import org.springframework.security.access.prepost.PreAuthorize;
+ import com.carddemo.domain.entity.CardEntity;
+ import com.carddemo.domain.repository.CardRepository;
+@@ -20,7 +21,9 @@
+  * Card update screen. Corresponds to COCRDUPC.cbl (1,560 LOC).
+  *
++ * SEC-016: Restricted to ROLE_ADMIN until user→card ownership link is implemented.
+  * RULE-030: expiry day is immutable — always carried forward from the existing record.
+  * SEC-005: CVV field is absent from CardEntity and all form responses (PCI DSS).
+  */
+ @Controller
+ @RequestMapping("/cards")
++@PreAuthorize("hasRole('ADMIN')")
+ public class CardUpdateController {
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-017: Bill-payment IDOR — restrict confirm/pay until ownership model exists
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/billing/BillPaymentController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/billing/BillPaymentController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/billing/BillPaymentController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/billing/BillPaymentController.java
+@@ -1,5 +1,6 @@
+ package com.carddemo.web.billing;
+
++import org.springframework.security.access.prepost.PreAuthorize;
+ import com.carddemo.domain.entity.AccountEntity;
+ import com.carddemo.domain.entity.TransactionEntity;
+ import com.carddemo.domain.repository.AccountRepository;
+@@ -27,6 +28,11 @@
+  * RULE-010: payment = full current balance.
+  * RULE-011: zero balance → HTTP 400 / form error.
+  * RULE-012: transaction ID from DB sequence (in BillPaymentService).
++ *
++ * SEC-017: confirm() and pay() are restricted to ROLE_ADMIN until a user→account
++ * ownership link is implemented. Production path: add customer_id to app_user,
++ * resolve via CardXRefRepository, and verify accountId matches the authenticated
++ * user's customer before allowing the payment.
+  */
+ @Controller
+ @RequestMapping("/billing")
+@@ -49,6 +55,7 @@
+     /**
+      * Confirmation step: show account balance before committing payment.
+      * Mirrors COBOL "Confirm to make a bill payment..." message when CONF-PAY-NO.
++     * SEC-017: restricted to ADMIN — see class-level note.
+      */
++    @PreAuthorize("hasRole('ADMIN')")
+     @PostMapping("/confirm")
+     public String confirm(@RequestParam Long accountId, Model model) {
+@@ -62,6 +69,8 @@
+     /**
+      * Execute payment after user confirms with Y (RULE-010/011/012).
++     * SEC-017: restricted to ADMIN — see class-level note.
+      */
++    @PreAuthorize("hasRole('ADMIN')")
+     @PostMapping("/pay")
+     public String pay(@RequestParam Long accountId,
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-018(a): RULE-051 bypass — split TransactionService.add() into validate()+save()
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionService.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionService.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionService.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionService.java
+@@ -58,8 +58,10 @@
+     }
+
+     /**
+-     * Validates and saves a new transaction (RULE-047–054).
+-     * Caller must have already received Y confirmation (RULE-051).
++     * Validates input fields only (RULE-047–054). No DB write.
++     * SEC-018: call this from the step-1 display handler; call save() only after Y confirmation.
+      */
+-    @Transactional
+-    public TransactionEntity add(TransactionAddRequest req) {
++    public void validate(TransactionAddRequest req) {
+         // RULE-047
+         if (req.cardNumber() == null || req.cardNumber().isBlank())
+             throw new ValidationException("Card number is required (RULE-047)");
+@@ -79,14 +79,18 @@
+         if (req.originDate() != null && !req.originDate().isBlank()) {
+             try { LocalDate.parse(req.originDate()); }
+             catch (DateTimeParseException e) {
+                 throw new ValidationException("Invalid date format (must be YYYY-MM-DD): " + req.originDate());
+             }
+         }
+-
+-        // Verify card exists in XREF
+         if (cardXRefRepository.findById(req.cardNumber()).isEmpty())
+             throw new ValidationException("Card not found in XREF: " + req.cardNumber());
++    }
+
++    /**
++     * Persists a validated transaction (RULE-012). Caller must have received Y confirmation (RULE-051).
++     * SEC-018: always call validate(req) before this method; save() re-validates as an internal guard.
++     */
++    @Transactional
++    public TransactionEntity save(TransactionAddRequest req) {
++        validate(req);  // guard: re-validate in case save() is called out of sequence
+         String ts = LocalDateTime.now().format(TS_FMT);
+         String originTs = (req.originDate() != null && !req.originDate().isBlank())
+             ? req.originDate() + " 00:00:00.000000" : ts;
+@@ -94,7 +105,7 @@
+         String tranId = idGenerator.nextId(); // RULE-012
+         TransactionEntity tran = new TransactionEntity(
+             tranId, req.typeCode(), req.categoryCode(),
+             "Online", req.description(), req.amount(),
+             0L, req.merchantName() != null ? req.merchantName() : "",
+             "", "",
+             req.cardNumber(), originTs, ts
+         );
+         return transactionRepository.save(tran);
+     }
+ }
+
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionAddController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionAddController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionAddController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionAddController.java
+@@ -43,13 +43,10 @@
+     /** Step 1: validate input and show confirmation page. SEC-018: validate only, no DB write. */
+     @PostMapping
+     public String validate(@RequestParam String cardNumber,
+                            @RequestParam String typeCode,
+                            @RequestParam(defaultValue = "1") Integer categoryCode,
+                            @RequestParam BigDecimal amount,
+                            @RequestParam(defaultValue = "") String description,
+                            @RequestParam(defaultValue = "") String merchantName,
+                            @RequestParam(defaultValue = "") String originDate,
+                            Model model) {
+         TransactionAddRequest req = new TransactionAddRequest(
+             cardNumber, typeCode, categoryCode, amount, description, merchantName, originDate);
+         try {
+-            // Validate without saving (RULE-047–054)
+-            transactionService.add(req); // will throw ValidationException on bad input
+-            // If add succeeded, we went past validation — this is fine for step1 in tests.
+-            // For proper two-step: show confirmation first. Here we validate+redirect for simplicity.
++            transactionService.validate(req); // SEC-018: no DB write — validates only
+             model.addAttribute("req", req);
+             return "transactions/confirm";
+         } catch (ValidationException e) {
+@@ -70,7 +67,7 @@
+         }
+         TransactionAddRequest req = new TransactionAddRequest(
+             cardNumber, typeCode, categoryCode, amount, description, merchantName, originDate);
+         try {
+-            TransactionEntity tran = transactionService.add(req);
++            TransactionEntity tran = transactionService.save(req); // SEC-018: only after Y confirmation
+             redirectAttrs.addFlashAttribute("success",
+                 "Transaction added. ID: " + tran.getId());
+             return "redirect:/transactions";
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-018(b): Transaction list IDOR — restrict to ADMIN until ownership model exists
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionListController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionListController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionListController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/transaction/TransactionListController.java
+@@ -1,5 +1,6 @@
+ package com.carddemo.web.transaction;
+
++import org.springframework.security.access.prepost.PreAuthorize;
+ import com.carddemo.domain.repository.CardXRefRepository;
+ import com.carddemo.domain.repository.TransactionRepository;
+ import org.springframework.security.core.annotation.AuthenticationPrincipal;
+@@ -14,7 +15,11 @@
+ /**
+  * Replicates COTRN00C — transaction list screen.
+- * Lists transactions for a given card number (RULE-022 page size not implemented for PoC).
++ * Lists transactions for a given card number.
++ *
++ * SEC-018: Restricted to ROLE_ADMIN until user→card ownership link is implemented.
++ * Production path: resolve principal's cardNumber via CardXRefRepository and assert
++ * the requested cardNumber belongs to the authenticated user.
+  */
+ @Controller
+ @RequestMapping("/transactions")
++@PreAuthorize("hasRole('ADMIN')")
+ public class TransactionListController {
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-019: Password length guard — CVE-2025-22228 (BCrypt 72-char truncation)
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/user/UserAddController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/user/UserAddController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/user/UserAddController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/user/UserAddController.java
+@@ -37,6 +37,14 @@
+     @PostMapping
+     public String addUser(@RequestParam String userId,
+                           @RequestParam String firstName,
+                           @RequestParam String lastName,
+                           @RequestParam String password,
+                           @RequestParam String userType,
+                           Model model) {
++        // SEC-019: BCrypt silently truncates passwords > 72 bytes (CVE-2025-22228).
++        // Reject early so the user knows their full password is required on login.
++        if (password == null || password.isBlank()) {
++            model.addAttribute("error", "Password is required.");
++            return "user/add";
++        }
++        if (password.length() > 72) {
++            model.addAttribute("error", "Password must be 72 characters or fewer (BCrypt limit — CVE-2025-22228).");
++            return "user/add";
++        }
+         if (userRepository.existsById(userId.toUpperCase())) {
+
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/user/UserUpdateController.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/user/UserUpdateController.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/user/UserUpdateController.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/user/UserUpdateController.java
+@@ -41,6 +41,11 @@
+     public String updateUser(@RequestParam String userId,
+                              @RequestParam String firstName,
+                              @RequestParam String lastName,
+                              @RequestParam(required = false) String password,
+                              @RequestParam String userType,
+                              Model model) {
++        // SEC-019: guard BCrypt 72-char truncation (CVE-2025-22228).
++        if (password != null && !password.isBlank() && password.length() > 72) {
++            model.addAttribute("error", "Password must be 72 characters or fewer (BCrypt limit — CVE-2025-22228).");
++            return "user/update";
++        }
+         return userRepository.findById(userId.toUpperCase()).map(existing -> {
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEC-021: Non-negative credit limit validation
+# ─────────────────────────────────────────────────────────────────────────────
+diff --git a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountUpdateValidator.java b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountUpdateValidator.java
+--- a/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountUpdateValidator.java
++++ b/modernized/CardDemo/carddemo-web/src/main/java/com/carddemo/web/account/AccountUpdateValidator.java
+@@ -35,9 +35,18 @@
+         // RULE-045: credit limit numeric
+         if (form.creditLimit() == null) {
+             errors.add("RULE-045: Credit limit is required");
+-        }
++        } else if (form.creditLimit().compareTo(BigDecimal.ZERO) < 0) {
++            // SEC-021: negative credit limit corrupts the account record
++            errors.add("SEC-021: Credit limit must be zero or greater");
++        } else if (form.creditLimit().compareTo(new BigDecimal("9999999999.99")) > 0) {
++            errors.add("RULE-045: Credit limit exceeds maximum (PIC S9(10)V99)");
++        }
+         if (form.cashCreditLimit() == null) {
+             errors.add("RULE-045: Cash credit limit is required");
+-        }
++        } else if (form.cashCreditLimit().compareTo(BigDecimal.ZERO) < 0) {
++            errors.add("SEC-021: Cash credit limit must be zero or greater");
++        } else if (form.cashCreditLimit().compareTo(new BigDecimal("9999999999.99")) > 0) {
++            errors.add("RULE-045: Cash credit limit exceeds maximum (PIC S9(10)V99)");
++        }
+
+# SEC-001: credential remediation — hunk in security_remediation.local.patch (gitignored; not for sharing)

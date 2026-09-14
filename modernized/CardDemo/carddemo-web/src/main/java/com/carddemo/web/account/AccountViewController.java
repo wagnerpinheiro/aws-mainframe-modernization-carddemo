@@ -1,5 +1,6 @@
 package com.carddemo.web.account;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,10 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * COACTVWC reads ACCTDATA (random) and CUSTFILE (via XREF) and displays the result.
  * No write logic, no validation. Simplest D3 program — used as Phase 4 pilot.
  *
+ * SEC-015: Restricted to ROLE_ADMIN until user→account ownership link is implemented.
+ * Production path: add customer_id to app_user, resolve via CardXRefRepository, and
+ * replace @PreAuthorize with ownershipService.ownsAccount(authentication, id) check.
+ *
  * NOTE: CODING-TO-BE-DONE sentinel present in legacy; no activated functionality gap identified.
  */
 @Controller
 @RequestMapping("/accounts")
+@PreAuthorize("hasRole('ADMIN')")
 public class AccountViewController {
 
     private final AccountQueryService accountQueryService;

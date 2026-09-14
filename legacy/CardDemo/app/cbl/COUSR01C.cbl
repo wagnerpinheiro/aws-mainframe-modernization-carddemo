@@ -80,6 +80,12 @@
                PERFORM RETURN-TO-PREV-SCREEN
            ELSE
                MOVE DFHCOMMAREA(1:EIBCALEN) TO CARDDEMO-COMMAREA
+      *    SEC-009: EIBCALEN > 0 does not prove admin role — check COMMAREA explicitly.
+      *    Must appear after COMMAREA copy so CDEMO-USRTYP-ADMIN is populated.
+               IF NOT CDEMO-USRTYP-ADMIN
+                   MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM
+                   PERFORM RETURN-TO-PREV-SCREEN
+               END-IF
                IF NOT CDEMO-PGM-REENTER
                    SET CDEMO-PGM-REENTER    TO TRUE
                    MOVE LOW-VALUES          TO COUSR1AO

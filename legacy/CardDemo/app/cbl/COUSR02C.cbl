@@ -92,6 +92,12 @@
                PERFORM RETURN-TO-PREV-SCREEN
            ELSE
                MOVE DFHCOMMAREA(1:EIBCALEN) TO CARDDEMO-COMMAREA
+      *    SEC-009: verify admin role from COMMAREA before proceeding.
+      *    Must appear after COMMAREA copy so CDEMO-USRTYP-ADMIN is populated.
+               IF NOT CDEMO-USRTYP-ADMIN
+                   MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM
+                   PERFORM RETURN-TO-PREV-SCREEN
+               END-IF
                IF NOT CDEMO-PGM-REENTER
                    SET CDEMO-PGM-REENTER    TO TRUE
                    MOVE LOW-VALUES          TO COUSR2AO
@@ -166,7 +172,9 @@
            IF NOT ERR-FLG-ON
                MOVE SEC-USR-FNAME      TO FNAMEI    OF COUSR2AI
                MOVE SEC-USR-LNAME      TO LNAMEI    OF COUSR2AI
-               MOVE SEC-USR-PWD        TO PASSWDI   OF COUSR2AI
+      *    SEC-004: password field left blank intentionally — never pre-populate.
+      *    Blank PASSWDI on the update screen now means "keep existing password".
+      *         MOVE SEC-USR-PWD        TO PASSWDI   OF COUSR2AI
                MOVE SEC-USR-TYPE       TO USRTYPEI  OF COUSR2AI
                PERFORM SEND-USRUPD-SCREEN
            END-IF.
@@ -196,11 +204,8 @@
                    MOVE -1       TO LNAMEL OF COUSR2AI
                    PERFORM SEND-USRUPD-SCREEN
                WHEN PASSWDI OF COUSR2AI = SPACES OR LOW-VALUES
-                   MOVE 'Y'     TO WS-ERR-FLG
-                   MOVE 'Password can NOT be empty...' TO
-                                   WS-MESSAGE
-                   MOVE -1       TO PASSWDL OF COUSR2AI
-                   PERFORM SEND-USRUPD-SCREEN
+      *    SEC-004: blank = keep existing stored password; not an error after pre-fill removed.
+                   CONTINUE
                WHEN USRTYPEI OF COUSR2AI = SPACES OR LOW-VALUES
                    MOVE 'Y'     TO WS-ERR-FLG
                    MOVE 'User Type can NOT be empty...' TO

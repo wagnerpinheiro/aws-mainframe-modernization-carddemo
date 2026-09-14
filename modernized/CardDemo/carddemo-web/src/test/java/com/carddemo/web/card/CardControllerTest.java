@@ -56,7 +56,7 @@ class CardControllerTest {
     // =========================================================================
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(roles = "ADMIN")
     void cardDetail_displaysCard() throws Exception {
         seedCard("4111111111111111", 10001L, "ALICE SMITH", "2028-06-15", "Y");
 
@@ -67,7 +67,7 @@ class CardControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(roles = "ADMIN")
     void cardDetail_notFound_showsError() throws Exception {
         mockMvc.perform(get("/cards/9999999999999999"))
             .andExpect(status().isOk())
@@ -79,7 +79,7 @@ class CardControllerTest {
     // =========================================================================
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(roles = "ADMIN")
     void cardList_showsCardsForAccount() throws Exception {
         seedAccount(20001L);
         seedCard("4111111111111111", 20001L, "BOB JONES", "2028-06-15", "Y");
@@ -153,7 +153,7 @@ class CardControllerTest {
     // =========================================================================
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(roles = "ADMIN")
     void cardDetail_noCvvInResponse() throws Exception {
         seedCard("4666666666666666", 60001L, "FRANK WILSON", "2028-06-15", "Y");
 

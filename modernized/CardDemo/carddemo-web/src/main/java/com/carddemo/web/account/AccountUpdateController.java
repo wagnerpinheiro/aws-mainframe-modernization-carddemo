@@ -1,5 +1,6 @@
 package com.carddemo.web.account;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.carddemo.domain.entity.AccountEntity;
 import com.carddemo.domain.entity.CustomerEntity;
 import com.carddemo.domain.repository.AccountRepository;
@@ -32,10 +33,12 @@ import java.util.List;
  *
  * RULE-053: optimistic locking — stale form version → HTTP 409 Conflict.
  *
+ * SEC-015: Restricted to ROLE_ADMIN until user→account ownership link is implemented.
  * NOTE: CODING-TO-BE-DONE sentinel present in legacy; no activated functionality gap identified.
  */
 @Controller
 @RequestMapping("/accounts")
+@PreAuthorize("hasRole('ADMIN')")
 public class AccountUpdateController {
 
     private static final Logger log = LoggerFactory.getLogger(AccountUpdateController.class);

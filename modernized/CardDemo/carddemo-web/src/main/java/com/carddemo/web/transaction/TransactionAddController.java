@@ -53,10 +53,7 @@ public class TransactionAddController {
         TransactionAddRequest req = new TransactionAddRequest(
             cardNumber, typeCode, categoryCode, amount, description, merchantName, originDate);
         try {
-            // Validate without saving (RULE-047–054)
-            transactionService.add(req); // will throw ValidationException on bad input
-            // If add succeeded, we went past validation — this is fine for step1 in tests.
-            // For proper two-step: show confirmation first. Here we validate+redirect for simplicity.
+            transactionService.validate(req); // SEC-018: no DB write — validates only
             model.addAttribute("req", req);
             return "transactions/confirm";
         } catch (ValidationException e) {
@@ -86,7 +83,7 @@ public class TransactionAddController {
         TransactionAddRequest req = new TransactionAddRequest(
             cardNumber, typeCode, categoryCode, amount, description, merchantName, originDate);
         try {
-            TransactionEntity tran = transactionService.add(req);
+            TransactionEntity tran = transactionService.save(req); // SEC-018: only after Y confirmation
             redirectAttrs.addFlashAttribute("success",
                 "Transaction added. ID: " + tran.getId());
             return "redirect:/transactions";

@@ -37,9 +37,17 @@ public final class AccountUpdateValidator {
         // RULE-045: credit limit numeric
         if (form.creditLimit() == null) {
             errors.add("RULE-045: Credit limit is required");
+        } else if (form.creditLimit().compareTo(BigDecimal.ZERO) < 0) {
+            errors.add("SEC-021: Credit limit must be zero or greater");
+        } else if (form.creditLimit().compareTo(new BigDecimal("9999999999.99")) > 0) {
+            errors.add("RULE-045: Credit limit exceeds maximum (PIC S9(10)V99)");
         }
         if (form.cashCreditLimit() == null) {
             errors.add("RULE-045: Cash credit limit is required");
+        } else if (form.cashCreditLimit().compareTo(BigDecimal.ZERO) < 0) {
+            errors.add("SEC-021: Cash credit limit must be zero or greater");
+        } else if (form.cashCreditLimit().compareTo(new BigDecimal("9999999999.99")) > 0) {
+            errors.add("RULE-045: Cash credit limit exceeds maximum (PIC S9(10)V99)");
         }
 
         // RULE-034: FICO 300–850

@@ -88,6 +88,12 @@
                PERFORM RETURN-TO-SIGNON-SCREEN                                  
            ELSE                                                                 
                MOVE DFHCOMMAREA(1:EIBCALEN) TO CARDDEMO-COMMAREA                
+      *    SEC-009: verify admin role from COMMAREA before proceeding.
+      *    Must appear after COMMAREA copy so CDEMO-USRTYP-ADMIN is populated.
+               IF NOT CDEMO-USRTYP-ADMIN
+                   MOVE 'COSGN00C' TO CDEMO-FROM-PROGRAM
+                   PERFORM RETURN-TO-SIGNON-SCREEN
+               END-IF
                IF NOT CDEMO-PGM-REENTER                                         
                    SET CDEMO-PGM-REENTER    TO TRUE                             
                    MOVE LOW-VALUES          TO COADM1AO                         

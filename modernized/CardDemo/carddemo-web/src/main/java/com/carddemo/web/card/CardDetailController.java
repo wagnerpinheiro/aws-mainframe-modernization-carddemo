@@ -1,5 +1,6 @@
 package com.carddemo.web.card;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.carddemo.domain.repository.CardRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * Read-only card detail screen. Corresponds to COCRDSLC.cbl.
  *
+ * SEC-016: Restricted to ROLE_ADMIN until user→card ownership link is implemented.
  * RULE-031: card must exist in CARDDAT before detail is shown.
  * SEC-005: CVV field absent — not queried, not displayed.
  *
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("/cards")
+@PreAuthorize("hasRole('ADMIN')")
 public class CardDetailController {
 
     private final CardRepository cardRepository;

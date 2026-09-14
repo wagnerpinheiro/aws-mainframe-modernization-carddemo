@@ -57,11 +57,10 @@ public class TransactionService {
     }
 
     /**
-     * Validates and saves a new transaction (RULE-047–054).
-     * Caller must have already received Y confirmation (RULE-051).
+     * Validates input fields only (RULE-047–054). No DB write.
+     * SEC-018: call this from the step-1 display handler; call save() only after Y confirmation.
      */
-    @Transactional
-    public TransactionEntity add(TransactionAddRequest req) {
+    public void validate(TransactionAddRequest req) {
         // RULE-047
         if (req.cardNumber() == null || req.cardNumber().isBlank())
             throw new ValidationException("Card number is required (RULE-047)");
@@ -84,10 +83,17 @@ public class TransactionService {
                 throw new ValidationException("Invalid date format (must be YYYY-MM-DD): " + req.originDate());
             }
         }
-
-        // Verify card exists in XREF
         if (cardXRefRepository.findById(req.cardNumber()).isEmpty())
             throw new ValidationException("Card not found in XREF: " + req.cardNumber());
+    }
+
+    /**
+     * Persists a validated transaction (RULE-012). Caller must have received Y confirmation (RULE-051).
+     * SEC-018: always call validate(req) before this method; save() re-validates as an internal guard.
+     */
+    @Transactional
+    public TransactionEntity save(TransactionAddRequest req) {
+        validate(req);  // guard: re-validate in case save() is called out of sequence
 
         String ts = LocalDateTime.now().format(TS_FMT);
         String originTs = (req.originDate() != null && !req.originDate().isBlank())

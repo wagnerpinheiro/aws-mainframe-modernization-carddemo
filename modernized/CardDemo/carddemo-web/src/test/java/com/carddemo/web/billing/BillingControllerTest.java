@@ -47,7 +47,7 @@ class BillingControllerTest {
 
     /** RULE-010: full-balance payment saves TransactionEntity and zeroes account balance. */
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void rule010_fullBalancePayment_savesTransactionAndZeroesBalance() throws Exception {
         long acctId = 10001L;
         accountRepository.save(account(acctId, "500.00"));
@@ -74,7 +74,7 @@ class BillingControllerTest {
 
     /** RULE-011: zero-balance account → payment rejected, no transaction saved. */
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void rule011_zeroBalance_paymentBlocked() throws Exception {
         long acctId = 20001L;
         accountRepository.save(account(acctId, "0.00"));
@@ -92,7 +92,7 @@ class BillingControllerTest {
 
     /** RULE-012: two sequential payments produce different transaction IDs (no READPREV race). */
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void rule012_sequentialPayments_uniqueTransactionIds() throws Exception {
         long acctId1 = 30001L, acctId2 = 30002L;
         accountRepository.save(account(acctId1, "100.00"));
@@ -114,7 +114,7 @@ class BillingControllerTest {
 
     /** Confirmation step shows account balance before committing. */
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void confirmationStep_showsBalance() throws Exception {
         long acctId = 40001L;
         accountRepository.save(account(acctId, "750.00"));

@@ -1,5 +1,6 @@
 package com.carddemo.web.card;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.carddemo.domain.entity.CardEntity;
 import com.carddemo.domain.repository.CardRepository;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * Card update screen. Corresponds to COCRDUPC.cbl (1,560 LOC).
  *
+ * SEC-016: Restricted to ROLE_ADMIN until user→card ownership link is implemented.
  * RULE-030: expiry day is immutable — always carried forward from the existing record.
  * SEC-005: CVV field is absent from CardEntity and all form responses (PCI DSS).
  *
@@ -24,6 +26,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/cards")
+@PreAuthorize("hasRole('ADMIN')")
 public class CardUpdateController {
 
     private final CardRepository cardRepository;

@@ -30,9 +30,13 @@
 //STEP1 EXEC PGM=FTP,REGION=2048K
 //*          PARM='10.81.148.4 (EXIT TIMEOUT 20'
 //SYSIN DD *
- 172.31.21.124
- carddemousr
- ftpdemo1
+ &FTPHOST.
+//* SEC-001: Replace the three lines above with RACF PassTicket or SFTP key auth.
+//* Set FTPHOST, FTPUSER, and FTPPASSWD as JCL symbolic parameters (&VAR.) or
+//* retrieve them from a RACF secrets manager / CyberArk vault at job submit time.
+//* Do NOT restore plaintext credentials here. Rotate the account before re-enabling.
+ &FTPUSER.
+ &FTPPASSWD.
  ASCII
  pwd
  dir

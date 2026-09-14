@@ -56,7 +56,7 @@ class AccountControllerTest {
     // =========================================================================
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(roles = "ADMIN")
     void viewAccount_displaysAccountAndCustomerFields() throws Exception {
         long acctId = 10001L, custId = 9001L;
         accountRepository.save(new AccountEntity(
@@ -78,7 +78,7 @@ class AccountControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(roles = "ADMIN")
     void viewAccount_notFound_returns200WithError() throws Exception {
         mockMvc.perform(get("/accounts/99999"))
             .andExpect(status().isOk())

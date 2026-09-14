@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * Card list screen. Corresponds to COCRDLIC.cbl.
  *
- * Scope enforcement: non-admin sees only cards for their account.
- * Admin sees all cards (or cards for a specific account).
+ * SEC-016: Scope enforcement is NOT implemented — UserEntity has no FK to account/card.
+ * Restricted to ROLE_ADMIN until user→account ownership model is added.
+ * Remove @PreAuthorize and add ownershipService.ownsAccount() check when model is ready.
  *
  * RULE-060: card active status domain (Y/N) shown in list.
  * SEC-005: no CVV field in any response.
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("/accounts/{accountId}/cards")
+@PreAuthorize("hasRole('ADMIN')")
 public class CardListController {
 
     private final CardRepository cardRepository;

@@ -1,5 +1,6 @@
 package com.carddemo.web.billing;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.carddemo.domain.entity.AccountEntity;
 import com.carddemo.domain.entity.TransactionEntity;
 import com.carddemo.domain.repository.AccountRepository;
@@ -25,6 +26,11 @@ import java.util.Optional;
  * RULE-010: payment = full current balance.
  * RULE-011: zero balance → HTTP 400 / form error.
  * RULE-012: transaction ID from DB sequence (in BillPaymentService).
+ *
+ * SEC-017: confirm() and pay() are restricted to ROLE_ADMIN until a user→account
+ * ownership link is implemented. Production path: add customer_id to app_user,
+ * resolve via CardXRefRepository, and verify accountId matches the authenticated
+ * user's customer before allowing the payment.
  */
 @Controller
 @RequestMapping("/billing")
@@ -47,7 +53,9 @@ public class BillPaymentController {
     /**
      * Confirmation step: show account balance before committing payment.
      * Mirrors COBOL "Confirm to make a bill payment..." message when CONF-PAY-NO.
+     * SEC-017: restricted to ADMIN — see class-level note.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/confirm")
     public String confirm(@RequestParam Long accountId, Model model) {
         Optional<AccountEntity> account = accountRepository.findById(accountId);
@@ -62,7 +70,9 @@ public class BillPaymentController {
 
     /**
      * Execute payment after user confirms with Y (RULE-010/011/012).
+     * SEC-017: restricted to ADMIN — see class-level note.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/pay")
     public String pay(@RequestParam Long accountId,
                       @RequestParam(defaultValue = "N") String confirmed,

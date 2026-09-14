@@ -40,6 +40,15 @@ public class UserAddController {
                           @RequestParam String password,
                           @RequestParam String userType,
                           Model model) {
+        // SEC-019: BCrypt silently truncates passwords > 72 bytes (CVE-2025-22228).
+        if (password == null || password.isBlank()) {
+            model.addAttribute("error", "Password is required.");
+            return "user/add";
+        }
+        if (password.length() > 72) {
+            model.addAttribute("error", "Password must be 72 characters or fewer (BCrypt limit — CVE-2025-22228).");
+            return "user/add";
+        }
         if (userRepository.existsById(userId.toUpperCase())) {
             model.addAttribute("error", "User ID already exists.");
             return "user/add";

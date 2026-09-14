@@ -44,6 +44,11 @@ public class UserUpdateController {
                              @RequestParam(required = false) String password,
                              @RequestParam String userType,
                              Model model) {
+        // SEC-019: guard BCrypt 72-char truncation (CVE-2025-22228).
+        if (password != null && !password.isBlank() && password.length() > 72) {
+            model.addAttribute("error", "Password must be 72 characters or fewer (BCrypt limit — CVE-2025-22228).");
+            return "user/update";
+        }
         return userRepository.findById(userId.toUpperCase()).map(existing -> {
             String hashed = (password != null && !password.isBlank())
                 ? passwordEncoder.encode(password)
