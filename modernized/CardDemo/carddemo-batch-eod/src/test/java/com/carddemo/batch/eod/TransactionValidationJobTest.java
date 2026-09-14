@@ -19,7 +19,9 @@ import org.springframework.batch.item.file.transform.Range;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
+import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -169,6 +171,24 @@ class TransactionValidationJobTest {
     @Autowired
     private JobRepositoryTestUtils jobRepositoryTestUtils;
 
+    /**
+     * Explicit qualifier needed because both transactionValidationJob and
+     * transactionPostingJob are registered in the context.  Without it,
+     * {@link JobLauncherTestUtils#setJob} would receive the wrong job or none.
+     */
+    @Autowired
+    @Qualifier("transactionValidationJob")
+    private Job validationJob;
+
+    /**
+     * Stores the most recent job execution from {@link #launchJob()}.
+     * Return type of that helper is {@code void} to prevent
+     * {@link org.springframework.batch.test.JobScopeTestExecutionListener}
+     * from discovering it via return-type scan (it scans for methods returning
+     * {@code JobExecution} and invokes them before {@code @BeforeEach} runs).
+     */
+    private JobExecution lastExecution;
+
     @Autowired
     private AccountRepository accountRepository;
 
@@ -184,8 +204,12 @@ class TransactionValidationJobTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        // Target the validation job when multiple Job beans exist in context.
+        jobLauncherTestUtils.setJob(validationJob);
+
         // Clean batch metadata between tests so the same job can be re-run.
         jobRepositoryTestUtils.removeJobExecutions();
+        lastExecution = null;
 
         // Clear domain data left by the previous test.
         cardXRefRepository.deleteAll();
@@ -223,7 +247,8 @@ class TransactionValidationJobTest {
         FixtureLoader.loadFullFixtures(cardXRefRepository, accountRepository);
         // TEST_INPUT already set to classpath:fixtures/dailytran.txt in setUp().
 
-        JobExecution execution = launchJob();
+        launchJob();
+        JobExecution execution = lastExecution;
 
         // Job-level
         assertEquals(BatchStatus.COMPLETED, execution.getStatus(),
@@ -276,7 +301,8 @@ class TransactionValidationJobTest {
             ))
         ));
 
-        JobExecution execution = launchJob();
+        launchJob();
+        JobExecution execution = lastExecution;
 
         // Job-level
         assertEquals(BatchStatus.COMPLETED, execution.getStatus(),
@@ -337,7 +363,8 @@ class TransactionValidationJobTest {
             ))
         ));
 
-        JobExecution execution = launchJob();
+        launchJob();
+        JobExecution execution = lastExecution;
 
         // Job-level
         assertEquals(BatchStatus.COMPLETED, execution.getStatus(),
@@ -388,7 +415,8 @@ class TransactionValidationJobTest {
         // No H2 data needed — no records will be processed.
         TEST_INPUT.set(new FileSystemResource(SyntheticDalytranBuilder.emptyTempFile()));
 
-        JobExecution execution = launchJob();
+        launchJob();
+        JobExecution execution = lastExecution;
 
         // Job-level
         assertEquals(BatchStatus.COMPLETED, execution.getStatus(),
@@ -456,7 +484,8 @@ class TransactionValidationJobTest {
             ))
         ));
 
-        JobExecution execution = launchJob();
+        launchJob();
+        JobExecution execution = lastExecution;
 
         // Job-level
         assertEquals(BatchStatus.COMPLETED, execution.getStatus(),
@@ -490,14 +519,22 @@ class TransactionValidationJobTest {
     // =========================================================================
 
     /**
-     * Launches the job registered in the test context with a unique {@code run.id}
-     * parameter so Spring Batch treats each invocation as a distinct job instance.
+     * Runs the validation job with a unique {@code run.id} parameter and stores the
+     * outcome in {@link #lastExecution}.
+     *
+     * <p>Return type is intentionally {@code void} so that
+     * {@link org.springframework.batch.test.JobScopeTestExecutionListener} cannot
+     * discover this helper via its return-type scan
+     * ({@code JobExecution.class.isAssignableFrom(method.getReturnType())}).
+     * The listener invokes any such method during test-instance preparation — before
+     * {@code @BeforeEach} sets the job on {@link JobLauncherTestUtils} — which would
+     * cause "The Job must not be null" with multiple {@code Job} beans in context.
      */
-    private JobExecution launchJob() throws Exception {
+    private void launchJob() throws Exception {
         JobParameters params = new JobParametersBuilder()
             .addLong("run.id", System.currentTimeMillis())
             .toJobParameters();
-        return jobLauncherTestUtils.launchJob(params);
+        lastExecution = jobLauncherTestUtils.launchJob(params);
     }
 
     /**

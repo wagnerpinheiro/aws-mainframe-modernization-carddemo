@@ -84,4 +84,9 @@ public class AccountEntity {
     public BigDecimal getCurrCycleDebit() { return currCycleDebit; }
     public String getAddrZip() { return addrZip; }
     public String getGroupId() { return groupId; }
+
+    // Mutators used by TransactionPostingService (CBTRN02C 2800-UPDATE-ACCOUNT-REC)
+    public void setCurrentBalance(BigDecimal v) { this.currentBalance = v; }
+    public void setCurrCycleCredit(BigDecimal v) { this.currCycleCredit = v; }
+    public void setCurrCycleDebit(BigDecimal v) { this.currCycleDebit = v; }
 }

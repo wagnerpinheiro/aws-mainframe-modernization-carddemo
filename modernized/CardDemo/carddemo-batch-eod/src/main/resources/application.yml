@@ -22,4 +22,5 @@ carddemo:
   batch:
     # Override these at runtime or in application-test.yml
     dalytran-input: file:./data/dailytran.txt
-    reject-output: ./output/rejects.csv
+    reject-output: ./output/validation-rejects.csv
+    posting-reject-output: ./output/posting-rejects.csv

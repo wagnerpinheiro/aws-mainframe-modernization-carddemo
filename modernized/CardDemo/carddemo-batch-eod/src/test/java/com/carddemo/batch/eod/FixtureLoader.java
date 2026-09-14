@@ -3,8 +3,11 @@ package com.carddemo.batch.eod;
 import com.carddemo.common.CobolDisplayParser;
 import com.carddemo.domain.entity.AccountEntity;
 import com.carddemo.domain.entity.CardXRefEntity;
+import com.carddemo.domain.entity.TranCatBalanceEntity;
+import com.carddemo.domain.entity.TranCatBalanceId;
 import com.carddemo.domain.repository.AccountRepository;
 import com.carddemo.domain.repository.CardXRefRepository;
+import com.carddemo.domain.repository.TranCatBalanceRepository;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
@@ -16,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test-only fixture loader for CBTRN01C characterization tests.
+ * Test-only fixture loader for CBTRN01C and CBTRN02C characterization tests.
  *
  * Parses the fixed-width ASCII fixture files (same encoding that the legacy COBOL
  * program consumed from VSAM) and seeds the H2 repositories via JPA.
@@ -42,6 +45,13 @@ import java.util.List;
  *     ACCT-ADDR-ZIP           : 103–112 X(10)
  *     ACCT-GROUP-ID           : 113–122 X(10)
  *     FILLER                  : 123–300 (ignored)
+ *
+ *   tcatbal.txt   — CVTRA01Y, 50 bytes/record:
+ *     TRANCAT-ACCT-ID  :  1–11  9(11)
+ *     TRANCAT-TYPE-CD  : 12–13  X(2)
+ *     TRANCAT-CD       : 14–17  9(4)
+ *     TRAN-CAT-BAL     : 18–28  S9(9)V99 sign-overpunch (11 chars)
+ *     FILLER           : 29–50  (ignored)
  */
 public final class FixtureLoader {
 
@@ -118,6 +128,47 @@ public final class FixtureLoader {
                 openDate, expirationDate, reissueDate,
                 currCycleCredit, currCycleDebit, addrZip, groupId
             ));
+        }
+        repo.saveAll(entities);
+    }
+
+    /**
+     * Parses {@code fixtures/tcatbal.txt} (50 bytes per line per CVTRA01Y) and saves
+     * all entries to the given repository.  Used by {@link TransactionPostingJobTest}
+     * to pre-populate TCATBAL so that paragraph 2700-UPDATE-TCATBAL exercises the
+     * "found → balance += amount" branch as well as the "not found → create" branch.
+     *
+     * <p>Layout (0-indexed byte ranges, Java):
+     * <ul>
+     *   <li>[0:11]  TRANCAT-ACCT-ID — parsed as {@code Long}</li>
+     *   <li>[11:13] TRANCAT-TYPE-CD — stored as {@code String(2)}</li>
+     *   <li>[13:17] TRANCAT-CD — parsed as {@code Integer}</li>
+     *   <li>[17:28] TRAN-CAT-BAL — S9(9)V99 sign-overpunch, 11 chars, 2 implied decimals</li>
+     *   <li>[28:50] FILLER — skipped</li>
+     * </ul>
+     *
+     * @param repo          the TranCatBalance JPA repository backed by H2
+     * @param classpathPath classpath-relative path (e.g., {@code "fixtures/tcatbal.txt"})
+     */
+    public static void loadTcatbal(TranCatBalanceRepository repo,
+                                   String classpathPath) throws IOException {
+        List<TranCatBalanceEntity> entities = new ArrayList<>();
+        for (String line : readLines(classpathPath)) {
+            if (line.isBlank()) continue;
+            // 0-indexed byte ranges (matching 1-indexed COBOL layout minus 1):
+            //   accountId  :  0–10 (11 chars)
+            //   typeCode   : 11–12 ( 2 chars)
+            //   categoryCode: 13–16 ( 4 chars)
+            //   balance    : 17–27 (11 chars) — S9(9)V99 sign-overpunch, 2 implied decimals
+            //   filler     : 28–49 (ignored)
+            long       accountId    = Long.parseLong(line.substring(0, 11).strip());
+            String     typeCode     = line.substring(11, 13);
+            int        categoryCode = Integer.parseInt(line.substring(13, 17).strip());
+            BigDecimal balance      = CobolDisplayParser.parseSignedAmount(
+                                          line.substring(17, 28), 2);
+
+            TranCatBalanceId id = new TranCatBalanceId(accountId, typeCode, categoryCode);
+            entities.add(new TranCatBalanceEntity(id, balance));
         }
         repo.saveAll(entities);
     }

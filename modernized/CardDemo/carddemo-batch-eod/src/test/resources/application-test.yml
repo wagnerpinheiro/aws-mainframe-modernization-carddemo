@@ -13,4 +13,5 @@ spring:
 carddemo:
   batch:
     dalytran-input: classpath:fixtures/dailytran.txt
-    reject-output: ${java.io.tmpdir}/carddemo-test-rejects.csv
+    reject-output: ${java.io.tmpdir}/carddemo-test-validation-rejects.csv
+    posting-reject-output: ${java.io.tmpdir}/carddemo-test-posting-rejects.csv
