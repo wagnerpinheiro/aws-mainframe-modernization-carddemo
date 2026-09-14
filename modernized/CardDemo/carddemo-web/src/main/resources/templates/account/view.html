@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Account View</title></head>
+<body>
+<h2>Account Details</h2>
+<p>Account ID: <span th:text="${account.id}"></span></p>
+<p>Active Status: <span th:text="${account.activeStatus}"></span></p>
+<p>Current Balance: <span th:text="${account.currentBalance}"></span></p>
+<p>Credit Limit: <span th:text="${account.creditLimit}"></span></p>
+<p>Expiration Date: <span th:text="${account.expirationDate}"></span></p>
+<th:block th:if="${customer != null}">
+<h3>Customer</h3>
+<p>Name: <span th:text="${fullName}"></span></p>
+<p>Address: <span th:text="${customer.addrLine1}"></span></p>
+<p>FICO Score: <span th:text="${customer.ficoCreditScore}"></span></p>
+</th:block>
+<a th:href="@{/accounts/{id}/edit(id=${account.id})}">Edit</a>
+</body></html>

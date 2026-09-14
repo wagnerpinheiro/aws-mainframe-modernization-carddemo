@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Edit Account</title></head>
+<body>
+<h2>Edit Account</h2>
+<ul th:if="${errors}"><li th:each="e : ${errors}" th:text="${e}"></li></ul>
+<form th:action="@{/accounts/{id}/edit(id=${form.accountId})}" method="post">
+  <input type="hidden" name="accountId" th:value="${form.accountId}"/>
+  <input type="hidden" name="version" th:value="${form.version}"/>
+  <label>Active Status: <input name="activeStatus" th:value="${form.activeStatus}"/></label><br/>
+  <label>Credit Limit: <input name="creditLimit" th:value="${form.creditLimit}"/></label><br/>
+  <label>First Name: <input name="firstName" th:value="${form.firstName}"/></label><br/>
+  <label>Last Name: <input name="lastName" th:value="${form.lastName}"/></label><br/>
+  <label>State: <input name="addrStateCd" th:value="${form.addrStateCd}"/></label><br/>
+  <label>Zip: <input name="addrZip" th:value="${form.addrZip}"/></label><br/>
+  <label>City: <input name="addrCity" th:value="${form.addrCity}"/></label><br/>
+  <label>Country: <input name="addrCountryCd" th:value="${form.addrCountryCd}"/></label><br/>
+  <label>FICO Score: <input name="ficoCreditScore" th:value="${form.ficoCreditScore}"/></label><br/>
+  <label>Pri Card Holder: <input name="priCardHolderInd" th:value="${form.priCardHolderInd}"/></label><br/>
+  <label>EFT Account ID: <input name="eftAccountId" th:value="${form.eftAccountId}"/></label><br/>
+  <input type="submit" value="Save"/>
+</form>
+</body></html>

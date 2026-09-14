@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Card List</title></head>
+<body>
+<h2>Cards</h2>
+<table><tr><th>Card Number</th><th>Embossed Name</th><th>Expiry</th><th>Status</th><th>Action</th></tr>
+<tr th:each="card : ${cards}">
+  <td th:text="${card.cardNumber}"></td>
+  <td th:text="${card.embossedName}"></td>
+  <td th:text="${card.expirationDate}"></td>
+  <td th:text="${card.activeStatus}"></td>
+  <td><a th:href="@{/cards/{cn}(cn=${card.cardNumber})}">View</a></td>
+</tr>
+</table>
+</body></html>

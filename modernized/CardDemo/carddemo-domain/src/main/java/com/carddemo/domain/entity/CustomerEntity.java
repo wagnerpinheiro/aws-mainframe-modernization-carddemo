@@ -116,4 +116,21 @@ public class CustomerEntity {
     public String getEftAccountId() { return eftAccountId; }
     public String getPriCardHolderInd() { return priCardHolderInd; }
     public Integer getFicoCreditScore() { return ficoCreditScore; }
+
+    // Mutators for AccountUpdateService (COACTUPC — customer fields editable from account update screen)
+    // NOTE: CODING-TO-BE-DONE sentinel present in legacy; no activated functionality gap identified
+    public void setFirstName(String v) { this.firstName = v; }
+    public void setMiddleName(String v) { this.middleName = v; }
+    public void setLastName(String v) { this.lastName = v; }
+    public void setAddrLine1(String v) { this.addrLine1 = v; }
+    public void setAddrLine2(String v) { this.addrLine2 = v; }
+    public void setAddrLine3(String v) { this.addrLine3 = v; }
+    public void setAddrStateCd(String v) { this.addrStateCd = v; }
+    public void setAddrCountryCd(String v) { this.addrCountryCd = v; }
+    public void setAddrZip(String v) { this.addrZip = v; }
+    public void setPhoneNum1(String v) { this.phoneNum1 = v; }
+    public void setPhoneNum2(String v) { this.phoneNum2 = v; }
+    public void setFicoCreditScore(Integer v) { this.ficoCreditScore = v; }
+    public void setEftAccountId(String v) { this.eftAccountId = v; }
+    public void setPriCardHolderInd(String v) { this.priCardHolderInd = v; }
 }

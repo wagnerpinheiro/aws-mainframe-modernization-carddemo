@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 
 /**
@@ -17,6 +18,11 @@ public class AccountEntity {
     @Id
     @Column(name = "acct_id")
     private Long id;
+
+    /** Optimistic locking version — RULE-053: concurrent update → OptimisticLockException → HTTP 409. */
+    @Version
+    @Column(name = "acct_version")
+    private Long version;
 
     @Column(name = "acct_active_status", length = 1)
     private String activeStatus;
@@ -85,8 +91,15 @@ public class AccountEntity {
     public String getAddrZip() { return addrZip; }
     public String getGroupId() { return groupId; }
 
-    // Mutators used by TransactionPostingService (CBTRN02C 2800-UPDATE-ACCOUNT-REC)
+    public Long getVersion() { return version; }
+
+    // Mutators used by TransactionPostingService (CBTRN02C) and AccountUpdateService (COACTUPC)
     public void setCurrentBalance(BigDecimal v) { this.currentBalance = v; }
     public void setCurrCycleCredit(BigDecimal v) { this.currCycleCredit = v; }
     public void setCurrCycleDebit(BigDecimal v) { this.currCycleDebit = v; }
+    public void setActiveStatus(String v) { this.activeStatus = v; }
+    public void setCreditLimit(BigDecimal v) { this.creditLimit = v; }
+    public void setCashCreditLimit(BigDecimal v) { this.cashCreditLimit = v; }
+    public void setAddrZip(String v) { this.addrZip = v; }
+    public void setGroupId(String v) { this.groupId = v; }
 }

@@ -47,4 +47,10 @@ public class CardEntity {
     public String getEmbossedName() { return embossedName; }
     public String getExpirationDate() { return expirationDate; }
     public String getActiveStatus() { return activeStatus; }
+
+    // Mutators for CardUpdateService (COCRDUPC)
+    // NOTE: CODING-TO-BE-DONE sentinel present in legacy; no activated functionality gap identified
+    public void setEmbossedName(String v) { this.embossedName = v; }
+    public void setExpirationDate(String v) { this.expirationDate = v; }
+    public void setActiveStatus(String v) { this.activeStatus = v; }
 }

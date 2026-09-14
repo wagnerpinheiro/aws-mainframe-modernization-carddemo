@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Card Detail</title></head>
+<body>
+<h2>Card Detail</h2>
+<p>Card Number: <span th:text="${card.cardNumber}"></span></p>
+<p>Embossed Name: <span th:text="${card.embossedName}"></span></p>
+<p>Expiration Date: <span th:text="${card.expirationDate}"></span></p>
+<p>Active Status: <span th:text="${card.activeStatus}"></span></p>
+<a th:href="@{/cards/{cn}/edit(cn=${card.cardNumber})}">Edit</a>
+</body></html>

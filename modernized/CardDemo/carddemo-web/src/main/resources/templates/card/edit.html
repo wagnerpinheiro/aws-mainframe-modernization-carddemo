@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Edit Card</title></head>
+<body>
+<h2>Edit Card</h2>
+<ul th:if="${errors}"><li th:each="e : ${errors}" th:text="${e}"></li></ul>
+<form th:action="@{/cards/{cn}/edit(cn=${form.cardNumber})}" method="post">
+  <input type="hidden" name="cardNumber" th:value="${form.cardNumber}"/>
+  <label>Embossed Name: <input name="embossedName" th:value="${form.embossedName}"/></label><br/>
+  <label>Active Status: <input name="activeStatus" th:value="${form.activeStatus}"/></label><br/>
+  <label>Expiry Month: <input name="expiryMonth" th:value="${form.expiryMonth}"/></label><br/>
+  <label>Expiry Year: <input name="expiryYear" th:value="${form.expiryYear}"/></label><br/>
+  <input type="submit" value="Save"/>
+</form>
+</body></html>

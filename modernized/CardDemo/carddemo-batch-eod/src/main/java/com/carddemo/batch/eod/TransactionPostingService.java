@@ -78,7 +78,12 @@ public class TransactionPostingService {
     }
 
     private void updateAccount(TransactionPostingResult result) {
-        var account = result.accountToUpdate();
+        // Reload account INSIDE the REQUIRES_NEW transaction to get the current @Version.
+        // The processor's snapshot may be stale if multiple transactions in one chunk target
+        // the same account — reloading avoids OptimisticLockException across calls.
+        var account = accountRepository.findById(result.xrefAccountId())
+            .orElseThrow(() -> new IllegalStateException(
+                "Account vanished during posting: " + result.xrefAccountId()));
         var amount = result.source().amount();
         account.setCurrentBalance(account.getCurrentBalance().add(amount));
         if (amount.compareTo(java.math.BigDecimal.ZERO) >= 0) {
