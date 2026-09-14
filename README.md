@@ -294,17 +294,57 @@ Estimativa baseada nos logs de uso (`ccusage`, preços API `claude-sonnet-4-6`):
 | **Infraestrutura de produção** | Pré-requisito | CI/CD, observabilidade, secrets manager, deploy AWS |
 | **TRANSFORMATION_NOTES.md** | Risco de manutenção | Ausente em 4 de 5 módulos; mapeamento legado→Java não documentado |
 
-### Estimativa de prazo — produção com o plugin code-modernization
+### Comparativo de estimativas por abordagem
 
-Com o plugin, a **transformação de código** passa de meses para dias. O bottleneck real muda para SME validation, dados e UAT.
+A tabela abaixo detalha **o que muda** em cada abordagem e qual atividade consome o tempo. As três colunas usam a **mesma base** — 33.876 LOC COBOL, 5 fases, equipe experiente em Java.
 
-| Cenário | Duração | Premissa crítica |
-|---|---|---|
-| **Otimista** | **16–22 semanas** (~4–5 meses) | SME disponível >50%; infra cloud existente; decisões em dias |
-| **Realista** *(mais provável)* | **24–34 semanas** (~6–8 meses) | SME intermitente; 2 rounds de UAT; migração de dados moderada |
-| **Conservador** | **36–48 semanas** (~9–12 meses) | SME escasso; dados sujos; compliance adicional; organização nova em cloud |
+#### Onde cada abordagem gasta o tempo (semanas por atividade)
 
-### Distribuição do esforço
+| Atividade | Sem IA | AI-Assisted (Claude genérico) | Plugin code-modernization |
+|---|---|---|---|
+| Discovery + análise + brief | 8–12 sem | 3–5 sem | **1–2 sem** |
+| Transformação de código (5 fases) | 30–50 sem | 10–18 sem | **1–2 sem** |
+| Geração de testes de equivalência | 10–16 sem | 4–8 sem | **incluído acima** |
+| Security audit + remediação | 4–8 sem | 2–4 sem | **1–2 sem** |
+| Validação SME mainframe | 6–10 sem | 6–10 sem | 6–10 sem *(não muda — humano)* |
+| Migração de dados VSAM | 4–8 sem | 3–6 sem | 3–6 sem *(não muda — dados reais)* |
+| Testes de performance e carga | 3–5 sem | 2–4 sem | 2–4 sem *(não muda — infra real)* |
+| UAT com usuários reais | 6–10 sem | 5–8 sem | 5–8 sem *(não muda — humano)* |
+| Infraestrutura CI/CD + AWS | 4–8 sem | 3–6 sem | 3–6 sem *(não muda — infra real)* |
+| Run paralelo + cutover + estabilização | 6–10 sem | 5–8 sem | 5–8 sem *(não muda — operacional)* |
+| **TOTAL** | **81–137 sem** | **43–77 sem** | **27–48 sem** |
+| **Em meses** | **20–34 meses** | **11–19 meses** | **7–12 meses** |
+
+#### Resumo: cenário mais provável ("Realista")
+
+| | Sem IA | AI-Assisted (Claude genérico) | Plugin code-modernization |
+|---|---|---|---|
+| **Duração total** | ~24–28 meses | ~14–17 meses | **~8–10 meses** |
+| **Equipe necessária** | 12–15 pessoas | 8–10 pessoas | 4–6 pessoas |
+| **Custo código + testes + audit** | Alto (principal custo) | Médio | **~$67 (PoC provou)** |
+| **Bottleneck real** | Escrita manual de código | Revisão/correção de código gerado | SME mainframe + dados + UAT |
+| **Risco de equivalência** | Alto (sem prova formal) | Médio (testes manuais) | Baixo (characterization tests automáticos) |
+| **Documentação gerada** | Manual, frequentemente incompleta | Parcial | BUSINESS_RULES.md, SECURITY_FINDINGS.md, TRANSFORMATION_NOTES.md automáticos |
+
+#### O que separa as três abordagens
+
+**Sem IA:** engenheiros Java leem COBOL manualmente, escrevem código e testes do zero, fazem audit de segurança manualmente. O código é o gargalo — leva meses porque cada decisão de design é um trabalho de análise humana.
+
+**AI-Assisted com Claude genérico:** Claude acelera a escrita de código e testes quando chamado pontualmente, mas o engenheiro ainda precisa decompor o sistema, decidir a arquitetura, escrever os prompts certos para cada fragmento e revisar/corrigir o código gerado. Reduz esforço em ~40–50%, mas não muda o processo.
+
+**Plugin code-modernization:** fluxo estruturado de ponta a ponta — `/modernize-assess` → `/modernize-map` → `/modernize-extract-rules` → `/modernize-brief` → `/modernize-transform` (por fase) → `/modernize-harden`. O plugin sabe o que perguntar, gera os artefatos certos, prova equivalência com testes de caracterização e verifica o próprio trabalho com agentes adversariais. O código sai da equação como gargalo. O que resta — SME, dados, UAT, infraestrutura — é o mesmo nas três abordagens.
+
+#### Por que o "bottleneck de código" importa
+
+```
+Sem IA:         [══════════ código ══════════][═══ dados/UAT/infra ═══]   24–28 meses
+Claude genérico:[══════ código ══════][═══ dados/UAT/infra ═══]           14–17 meses
+Plugin:         [cod][═══════════ dados / SME / UAT / infra ═══════════]   8–10 meses
+```
+
+Com o plugin, a fase de código encolhe de meses para ~2 semanas. O projeto não fica mais rápido depois disso — o restante é trabalho humano irredutivelmente necessário.
+
+### Distribuição do esforço — cenário com plugin (realista, 8–10 meses)
 
 ```
 Semanas
