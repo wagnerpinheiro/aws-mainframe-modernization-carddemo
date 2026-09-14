@@ -214,3 +214,126 @@ Regras: RULE-010/011 (pagamento), RULE-012 (ID por sequência DB — sem duplica
 git checkout modernize    # artefatos de modernização + target Java (branch ativo)
 git checkout main         # apenas fonte COBOL original
 ```
+
+---
+
+## Conclusão da PoC
+
+### Execução
+
+A PoC foi executada de forma **100% agentic** com o plugin `code-modernization` do Claude Code (modelo `claude-sonnet-4-6`, 1M context), em sessão única contínua em **13–14/09/2026**.
+
+| Marco | Horário (BRT) | Commit |
+|---|---|---|
+| Início — extração de regras | 19:36 | `9469eaf` |
+| Modernization brief aprovado | 19:49 | `b1cdd68` |
+| Phase 1 completa (25 testes) | 21:59 | `cdd2102` |
+| Phase 2 completa (18 testes) | 22:45 | `53963a3` |
+| Phase 3 completa (20 testes) | 23:18 | `7366a26` |
+| Phase 4 completa (14 testes) | 23:37 | `94e3a5b` |
+| Phase 5 completa (13 testes) | 00:05 | `f4dc3e4` |
+| PoC declarada — 90/90 GREEN | 00:09 | `4122899` |
+| Security harden — 10 findings | 00:59 | `c76f00a` |
+
+**Duração total: ~6 horas e 10 minutos** para transformar 33.876 LOC COBOL em Java 21 + Spring Boot 3.3.5, incluindo discovery, 90 testes de caracterização e security harden com verificação adversarial em dois rounds.
+
+| Etapa | Duração |
+|---|---|
+| Discovery + brief | ~13 min |
+| Phase 1 — Batch EOD (3 programas) | ~69 min |
+| Phase 2 — Reporting (9 programas) | ~46 min |
+| Phase 3 — Auth + Navegação (7 programas) | ~33 min |
+| Phase 4 — Account + Card (5 programas) | ~28 min |
+| Phase 5 — Transações + Billing (5 programas) | ~28 min |
+| Security harden (10 findings remediados) | ~49 min |
+
+### Custo
+
+Estimativa baseada nos logs de uso (`ccusage`, preços API `claude-sonnet-4-6`):
+
+| Fase | Custo USD |
+|---|---|
+| Discovery + brief | $2,77 |
+| Phase 1 — Batch EOD | $14,35 |
+| Phase 2 — Reporting | $1,18 |
+| Phase 3 — Auth + Navegação | $0,99 |
+| Phase 4 — Account + Card | $0,90 |
+| Phase 5 — Transações + Billing | $0,68 |
+| Security harden | $9,80 |
+| Assessments + análise + status | ~$36,00 |
+| **Total PoC end-to-end** | **~$67** |
+
+> O custo baixo de fases 2–5 (< $1 cada) é resultado do prompt cache: após a Phase 1 construir o contexto (~4M tokens), as fases seguintes leram do cache a $0,30/M em vez de processar input a $3/M — redução de 12,5× no custo de contexto. Sem cache, o custo estimado seria ~$550–700.
+>
+> Com **subscrição Claude Code Pro/Team/Enterprise**, o custo real foi o da mensalidade — não há cobrança por token.
+
+### O que a PoC provou
+
+| Hipótese (PREFLIGHT.md) | Resultado |
+|---|---|
+| Lógica de negócio COBOL é expressável em Java idiomático | ✅ 29 programas transformados, comportamento verificado por 90 testes |
+| Equivalência pode ser provada sem runtime z/OS | ✅ Golden-master + characterization tests suficientes |
+| god-program COACTUPC (4.236 LOC, CCN 122) é decompível | ✅ 5 classes Java ortogonais, @Transactional SERIALIZABLE |
+| Spring Security substitui CICS COMMAREA auth | ✅ BCrypt, ROLE_ADMIN/@PreAuthorize, session invalidation |
+| Batch COBOL → Spring Batch é viável | ✅ 3 jobs EOD + 8 jobs reporting com equivalência numérica |
+
+---
+
+## Próximos passos — Migração para produção
+
+### O que a PoC NÃO cobriu (gaps obrigatórios antes de produção)
+
+| Gap | Impacto | Ação requerida |
+|---|---|---|
+| **Migração de dados VSAM → banco relacional** | Bloqueador | Spike de 2 semanas: volume, integridade referencial, estratégia de rollback |
+| **Modelo user→account (SEC-015/016/017/018)** | Bloqueador de UX | Adicionar `customer_id` em `app_user`; implementar `OwnershipService` |
+| **Upgrade Spring Boot 3.3.7+** | Bloqueador de segurança | CVE-2025-22228 (BCrypt 72-char); atualizar antes de qualquer deploy |
+| **Purga git — credenciais FTP em `f26cb12`** | Bloqueador de segurança | `git filter-repo --path legacy/CardDemo/app/jcl/FTPJCL.JCL --invert-paths` |
+| **Testes de performance e carga** | Risco operacional | Nenhum baseline de throughput foi estabelecido |
+| **Testes de UI em browser** | Risco funcional | O plugin gera Thymeleaf; ninguém testou nenhuma tela clicando |
+| **Infraestrutura de produção** | Pré-requisito | CI/CD, observabilidade, secrets manager, deploy AWS |
+| **TRANSFORMATION_NOTES.md** | Risco de manutenção | Ausente em 4 de 5 módulos; mapeamento legado→Java não documentado |
+
+### Estimativa de prazo — produção com o plugin code-modernization
+
+Com o plugin, a **transformação de código** passa de meses para dias. O bottleneck real muda para SME validation, dados e UAT.
+
+| Cenário | Duração | Premissa crítica |
+|---|---|---|
+| **Otimista** | **16–22 semanas** (~4–5 meses) | SME disponível >50%; infra cloud existente; decisões em dias |
+| **Realista** *(mais provável)* | **24–34 semanas** (~6–8 meses) | SME intermitente; 2 rounds de UAT; migração de dados moderada |
+| **Conservador** | **36–48 semanas** (~9–12 meses) | SME escasso; dados sujos; compliance adicional; organização nova em cloud |
+
+### Distribuição do esforço
+
+```
+Semanas
+ 1─── 4   Discovery produção + validação SME das regras (69 do BUSINESS_RULES.md)
+ 5───10   Phase 1 pilot produção (código: 2 dias) + spike migração de dados + infra base
+11───16   Phases 2+3 paralelas (código: 1 dia cada) + migration scripts + testes de carga
+17───22   Phase 4 — COACTUPC + ownership model (código: 1 dia, revisão SME: 1 semana)
+23───26   Phase 5 + harden formal + performance baseline
+27───33   UAT round 1 com usuários reais + correções
+34───36   UAT round 2 + sign-off regulatório
+37───40   Run paralelo (COBOL + Java simultâneos)
+41───44   Cutover + estabilização
+```
+
+### Principais riscos de prazo
+
+| Risco | Probabilidade | Mitigação |
+|---|---|---|
+| **Disponibilidade de SME mainframe** | Alta | Gargalo histórico nº1; agendar antes de iniciar o projeto |
+| **COACTUPC em produção** — 4.236 LOC, CCN 122 | Alta | Decomposição mandatória (brief já documenta a ordem); não tentar em bloco |
+| **Migração de dados com volume real** | Média-Alta | Spike antes de qualquer estimativa de cronograma final |
+| **RULE-059/065/066** — comportamento ambíguo | Média | Decisão de SME bloqueante; 3 perguntas abertas desde Phase 1 |
+| **Modelo user→account ausente** | Média | Bloqueia acesso de usuários regulares a account/card/billing |
+
+### Artefatos de segurança gerados
+
+| Artefato | Localização |
+|---|---|
+| Catálogo de findings (10 vulnerabilidades) | `analysis/CardDemo/SECURITY_FINDINGS.md` |
+| Patch remediação (verificado em 2 rounds) | `analysis/CardDemo/security_remediation.patch` |
+| Patch credenciais (gitignored) | `analysis/CardDemo/security_remediation.local.patch` |
+| Inventário de credenciais (gitignored) | `analysis/CardDemo/SECRETS.local.md` |
