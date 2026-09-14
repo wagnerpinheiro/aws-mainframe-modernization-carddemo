@@ -22,6 +22,7 @@
         <module>carddemo-common</module>
         <module>carddemo-domain</module>
         <module>carddemo-batch-eod</module>
+        <module>carddemo-batch-reporting</module>
     </modules>
 
     <properties>
