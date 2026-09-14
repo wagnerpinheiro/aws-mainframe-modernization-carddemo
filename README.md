@@ -203,7 +203,11 @@ Regras: RULE-010/011 (pagamento), RULE-012 (ID por sequência DB — sem duplica
 | Topologia de dependências (interativo) | `analysis/CardDemo/TOPOLOGY.html` |
 | Golden master batch | `modernized/CardDemo/BASELINE.md` |
 | Playbook Phase 1 | `modernized/CardDemo/PHASE1_PLAYBOOK.md` |
-| Notas de transformação | `modernized/CardDemo/carddemo-batch-eod/TRANSFORMATION_NOTES.md` |
+| Notas de transformação — Phase 1 | `modernized/CardDemo/carddemo-batch-eod/TRANSFORMATION_NOTES.md` |
+| Notas de transformação — Phase 2 | `modernized/CardDemo/carddemo-batch-reporting/TRANSFORMATION_NOTES.md` |
+| Notas de transformação — Phase 3 | `modernized/CardDemo/carddemo-web/TRANSFORMATION_NOTES_PHASE3.md` |
+| Notas de transformação — Phase 4 | `modernized/CardDemo/carddemo-web/TRANSFORMATION_NOTES_PHASE4.md` |
+| Notas de transformação — Phase 5 | `modernized/CardDemo/carddemo-web/TRANSFORMATION_NOTES_PHASE5.md` |
 | Declaração de conclusão do PoC | `modernized/CardDemo/POC_COMPLETE.md` |
 
 ---
@@ -292,7 +296,7 @@ Estimativa baseada nos logs de uso (`ccusage`, preços API `claude-sonnet-4-6`):
 | **Testes de performance e carga** | Risco operacional | Nenhum baseline de throughput foi estabelecido |
 | **Testes de UI em browser** | Risco funcional | O plugin gera Thymeleaf; ninguém testou nenhuma tela clicando |
 | **Infraestrutura de produção** | Pré-requisito | CI/CD, observabilidade, secrets manager, deploy AWS |
-| **TRANSFORMATION_NOTES.md** | Risco de manutenção | Ausente em 4 de 5 módulos; mapeamento legado→Java não documentado |
+| ~~**TRANSFORMATION_NOTES.md**~~ | ~~Risco de manutenção~~ | ✅ Gerado para todos os 5 módulos (ver seção Artefatos) |
 
 ### Comparativo de estimativas por abordagem
 
