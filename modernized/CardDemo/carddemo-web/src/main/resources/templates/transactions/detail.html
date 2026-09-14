@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Transaction Detail — CardDemo</title></head>
+<body>
+<h1>Transaction Detail</h1>
+<p th:if="${error}" th:text="${error}" style="color:red"></p>
+<div th:if="${transaction != null}">
+  <p>ID: <span th:text="${transaction.id}"></span></p>
+  <p>Type: <span th:text="${transaction.typeCode}"></span></p>
+  <p>Amount: <span th:text="${transaction.amount}"></span></p>
+  <p>Description: <span th:text="${transaction.description}"></span></p>
+  <p>Card: <span th:text="${transaction.cardNumber}"></span></p>
+</div>
+<a th:href="@{/transactions}">Back</a>
+</body>
+</html>

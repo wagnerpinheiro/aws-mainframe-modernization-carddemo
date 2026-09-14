@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Confirm Transaction — CardDemo</title></head>
+<body>
+<h1>Confirm Transaction</h1>
+<p>Review before saving:</p>
+<form th:action="@{/transactions/add/confirm}" method="post">
+  <input type="hidden" name="cardNumber" th:value="${req.cardNumber()}"/>
+  <input type="hidden" name="typeCode" th:value="${req.typeCode()}"/>
+  <input type="hidden" name="categoryCode" th:value="${req.categoryCode()}"/>
+  <input type="hidden" name="amount" th:value="${req.amount()}"/>
+  <input type="hidden" name="description" th:value="${req.description()}"/>
+  <input type="hidden" name="merchantName" th:value="${req.merchantName()}"/>
+  <input type="hidden" name="originDate" th:value="${req.originDate()}"/>
+  <input type="hidden" name="confirmed" value="Y"/>
+  <p>Card: <span th:text="${req.cardNumber()}"></span></p>
+  <p>Amount: <span th:text="${req.amount()}"></span></p>
+  <p>Description: <span th:text="${req.description()}"></span></p>
+  <button type="submit">Confirm (Y)</button>
+</form>
+<a th:href="@{/transactions/add}">Cancel (N)</a>
+</body>
+</html>

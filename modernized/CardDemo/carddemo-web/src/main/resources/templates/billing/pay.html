@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Bill Payment — CardDemo</title></head>
+<body>
+<h1>Bill Payment</h1>
+<p th:if="${error}" th:text="${error}" style="color:red"></p>
+<p th:if="${success}" th:text="${success}" style="color:green"></p>
+<form th:action="@{/billing/confirm}" method="post">
+  <label>Account ID: <input type="number" name="accountId" required/></label>
+  <button type="submit">Check Balance</button>
+</form>
+</body>
+</html>

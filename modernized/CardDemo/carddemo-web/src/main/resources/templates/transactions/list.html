@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Transactions — CardDemo</title></head>
+<body>
+<h1>Transaction List</h1>
+<form th:action="@{/transactions}" method="get">
+  <input type="text" name="cardNumber" placeholder="Card Number" th:value="${cardNumber}"/>
+  <button type="submit">Search</button>
+</form>
+<table th:if="${transactions != null}">
+  <tr><th>ID</th><th>Type</th><th>Amount</th><th>Description</th></tr>
+  <tr th:each="t : ${transactions}">
+    <td><a th:href="@{/transactions/{id}(id=${t.id})}" th:text="${t.id}"></a></td>
+    <td th:text="${t.typeCode}"></td>
+    <td th:text="${t.amount}"></td>
+    <td th:text="${t.description}"></td>
+  </tr>
+</table>
+<a th:href="@{/transactions/add}">Add Transaction</a>
+</body>
+</html>

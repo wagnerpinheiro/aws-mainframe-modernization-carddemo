@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Add Transaction — CardDemo</title></head>
+<body>
+<h1>Add Transaction</h1>
+<p th:if="${error}" th:text="${error}" style="color:red"></p>
+<form th:action="@{/transactions/add}" method="post">
+  <label>Card Number: <input type="text" name="cardNumber" required/></label><br/>
+  <label>Type Code: <input type="text" name="typeCode" value="01"/></label><br/>
+  <label>Category: <input type="number" name="categoryCode" value="1"/></label><br/>
+  <label>Amount: <input type="number" name="amount" step="0.01" required/></label><br/>
+  <label>Description: <input type="text" name="description" required/></label><br/>
+  <label>Merchant: <input type="text" name="merchantName"/></label><br/>
+  <label>Date (YYYY-MM-DD): <input type="text" name="originDate"/></label><br/>
+  <button type="submit">Review</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Confirm Payment — CardDemo</title></head>
+<body>
+<h1>Confirm Bill Payment</h1>
+<p>Account: <span th:text="${account.id}"></span></p>
+<p>Current Balance: <span th:text="${account.currentBalance}"></span></p>
+<p>This will pay your full balance. Confirm?</p>
+<form th:action="@{/billing/pay}" method="post">
+  <input type="hidden" name="accountId" th:value="${accountId}"/>
+  <input type="hidden" name="confirmed" value="Y"/>
+  <button type="submit">Yes, Pay Now</button>
+</form>
+<a th:href="@{/billing}">Cancel</a>
+</body>
+</html>
