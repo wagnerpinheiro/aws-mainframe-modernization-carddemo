@@ -9,4 +9,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
      * Used by StatementGenerationJob to group transactions by card number.
      */
     java.util.List<TransactionEntity> findAllByCardNumberOrderByIdAsc(String cardNumber);
+    java.util.List<TransactionEntity> findAllByOrderByCardNumberAscIdAsc();
+    java.util.List<TransactionEntity> findAllByProcessTimestampBetweenOrderByCardNumberAscIdAsc(String start, String end);
 }

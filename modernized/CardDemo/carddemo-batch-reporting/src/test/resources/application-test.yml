@@ -14,3 +14,11 @@ carddemo:
   reporting:
     statement-text-output: ${java.io.tmpdir}/carddemo-test-statements.txt
     statement-html-output: ${java.io.tmpdir}/carddemo-test-statements.html
+    account-report-output: ${java.io.tmpdir}/carddemo-test-account-report.txt
+    card-report-output: ${java.io.tmpdir}/carddemo-test-card-report.txt
+    xref-report-output: ${java.io.tmpdir}/carddemo-test-xref-report.txt
+    customer-report-output: ${java.io.tmpdir}/carddemo-test-customer-report.txt
+    transaction-report-output: ${java.io.tmpdir}/carddemo-test-transaction-report.txt
+    export-output: ${java.io.tmpdir}/carddemo-test-export.csv
+    import-input: ${java.io.tmpdir}/carddemo-test-export.csv
+    import-error-output: ${java.io.tmpdir}/carddemo-test-import-errors.csv

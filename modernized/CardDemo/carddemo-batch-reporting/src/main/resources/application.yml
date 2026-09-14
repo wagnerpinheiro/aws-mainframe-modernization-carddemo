@@ -22,3 +22,11 @@ carddemo:
   reporting:
     statement-text-output: ./output/statements.txt
     statement-html-output: ./output/statements.html
+    account-report-output: ./output/account-report.txt
+    card-report-output: ./output/card-report.txt
+    xref-report-output: ./output/xref-report.txt
+    customer-report-output: ./output/customer-report.txt
+    transaction-report-output: ./output/transaction-report.txt
+    export-output: ./output/export.csv
+    import-input: ./data/export.csv
+    import-error-output: ./output/import-errors.csv
