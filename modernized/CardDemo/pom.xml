@@ -23,6 +23,7 @@
         <module>carddemo-domain</module>
         <module>carddemo-batch-eod</module>
         <module>carddemo-batch-reporting</module>
+        <module>carddemo-web</module>
     </modules>
 
     <properties>

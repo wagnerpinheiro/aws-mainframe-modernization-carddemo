@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>User List</title></head>
+<body>
+<h2>User List (Security)</h2>
+<p th:if="${param.added}" style="color:green;">User added successfully.</p>
+<p th:if="${param.updated}" style="color:green;">User updated successfully.</p>
+<p th:if="${param.deleted}" style="color:green;">User deleted successfully.</p>
+<table border="1">
+  <tr><th>User ID</th><th>First Name</th><th>Last Name</th><th>Type</th><th>Actions</th></tr>
+  <tr th:each="u : ${users}">
+    <td th:text="${u.userId}"></td>
+    <td th:text="${u.firstName}"></td>
+    <td th:text="${u.lastName}"></td>
+    <td th:text="${u.userType}"></td>
+    <td>
+      <a th:href="@{/admin/users/update(userId=${u.userId})}">Update</a> |
+      <a th:href="@{/admin/users/delete(userId=${u.userId})}">Delete</a>
+    </td>
+  </tr>
+</table>
+<br/><a href="/admin/users/add">Add User</a> | <a href="/admin/menu">Admin Menu</a>
+</body>
+</html>

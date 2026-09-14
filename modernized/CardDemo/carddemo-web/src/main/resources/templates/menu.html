@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head><meta charset="UTF-8"><title>CardDemo Main Menu</title></head>
+<body>
+<h2>CardDemo — Main Menu</h2>
+<p>Welcome, <span sec:authentication="name"></span></p>
+<ul>
+  <li th:each="opt : ${options}">
+    <span th:text="${opt.number() + '. ' + opt.name()}"></span>
+  </li>
+</ul>
+<form method="post" action="/logout">
+  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+  <button type="submit">Sign Out (PF3)</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:carddemo-web-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=VALUE
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  thymeleaf:
+    cache: false

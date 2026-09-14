@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Delete User</title></head>
+<body>
+<h2>Delete User (Security)</h2>
+<p th:if="${error}" th:text="${error}" style="color:red;"></p>
+<div th:if="${user != null}">
+  <p>Confirm deletion of user: <strong th:text="${user.userId}"></strong>
+     (<span th:text="${user.firstName + ' ' + user.lastName}"></span>)?</p>
+  <form method="post" action="/admin/users/delete">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <input type="hidden" name="userId" th:value="${user.userId}"/>
+    <button type="submit" style="color:red;">Delete</button>
+    <a href="/admin/users">Cancel</a>
+  </form>
+</div>
+<a href="/admin/users">Back to User List</a>
+</body>
+</html>
