@@ -36,10 +36,33 @@ public class TransactionPostingService {
         this.transactionRepository = transactionRepository;
     }
 
-    // TODO(step2): implement post() method
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    /**
+     * Atomically persists one validated DALYTRAN record:
+     * TCATBAL update → account update → transaction write (CBTRN02C order: 2700/2800/2900).
+     *
+     * REQUIRES_NEW ensures SERIALIZABLE isolation takes effect even when called from
+     * within the step's chunk transaction (which may use a different isolation level).
+     * Each call is an independent unit-of-work; rollback affects only this one record.
+     *
+     * INSERT semantics for TransactionEntity (RULE-061): duplicate IDs throw
+     * IllegalStateException, causing the entire sub-transaction to roll back — TCATBAL
+     * and account balance are restored even though they were written before the exception.
+     * This fixes the COBOL defect (TD-07) where REWRITE failure left partial state.
+     */
+    @Transactional(isolation = Isolation.SERIALIZABLE,
+                   propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void post(TransactionPostingResult result) {
-        throw new UnsupportedOperationException("TransactionPostingService.post() not yet implemented");
+        // 2700-UPDATE-TCATBAL: upsert (ACCT-ID + TYPE-CD + CAT-CD) key
+        updateTcatBal(result);
+        // 2800-UPDATE-ACCOUNT-REC: balance and cycle accumulator update
+        updateAccount(result);
+        // 2900-WRITE-TRANSACTION-FILE: INSERT only (VSAM WRITE — not REWRITE semantics)
+        if (transactionRepository.existsById(result.preparedTransaction().getId())) {
+            throw new IllegalStateException(
+                "Duplicate transaction ID (RULE-061 rollback guard): "
+                + result.preparedTransaction().getId());
+        }
+        transactionRepository.save(result.preparedTransaction());
     }
 
     private void updateTcatBal(TransactionPostingResult result) {
@@ -56,11 +79,12 @@ public class TransactionPostingService {
 
     private void updateAccount(TransactionPostingResult result) {
         var account = result.accountToUpdate();
-        account.setCurrentBalance(account.getCurrentBalance().add(result.source().amount()));
-        if (result.source().amount().compareTo(java.math.BigDecimal.ZERO) >= 0) {
-            account.setCurrCycleCredit(account.getCurrCycleCredit().add(result.source().amount()));
+        var amount = result.source().amount();
+        account.setCurrentBalance(account.getCurrentBalance().add(amount));
+        if (amount.compareTo(java.math.BigDecimal.ZERO) >= 0) {
+            account.setCurrCycleCredit(account.getCurrCycleCredit().add(amount));
         } else {
-            account.setCurrCycleDebit(account.getCurrCycleDebit().add(result.source().amount()));
+            account.setCurrCycleDebit(account.getCurrCycleDebit().add(amount));
         }
         accountRepository.save(account);
     }
